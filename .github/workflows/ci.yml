@@ -62,9 +62,10 @@ jobs:
           path: build/reports/tests/test/
 
   publish-jar:
-    name: Build & Publish JAR
+    name: Publish JAR to GitHub Packages
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name != 'pull_request'
 
     steps:
       - name: Checkout
@@ -79,19 +80,18 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build JAR (skip tests — already passed)
-        run: ./gradlew bootJar -x test
-
-      - name: Upload JAR as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: artreid3-jar
-          path: build/libs/*.jar
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish -x test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
   publish-docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name != 'pull_request'
 
     steps:
       - name: Checkout
