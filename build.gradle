@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.13'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'maven-publish'
+}
+
+group = 'com.ck.hackaton.artreid_3'
+version = '0.0.1-SNAPSHOT'
+
+publishing {
+	repositories {
+		maven {
+			name = 'GitHubPackages'
+			url = uri("https://maven.pkg.github.com/${System.env.GITHUB_REPOSITORY ?: 'mipt-ck-hackaton-2026/artreid-3'}")
+			credentials {
+				username = System.env.GITHUB_ACTOR ?: ''
+				password = System.env.GITHUB_TOKEN ?: ''
+			}
+		}
+	}
+	publications {
+		bootJava(MavenPublication) {
+			artifact tasks.named('bootJar')
+			groupId = project.group
+			artifactId = rootProject.name
+			version = project.version
+		}
+	}
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testCompileOnly 'org.projectlombok:lombok'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+springBoot {
+	buildInfo()
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
