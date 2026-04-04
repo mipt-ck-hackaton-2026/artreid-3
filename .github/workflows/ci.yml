@@ -21,7 +21,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_DB: artreid3
           POSTGRES_USER: artreid3
@@ -60,7 +60,6 @@ jobs:
         with:
           name: test-report
           path: build/reports/tests/test/
-          retention-days: 14
 
   publish-jar:
     name: Build & Publish JAR
@@ -88,7 +87,6 @@ jobs:
         with:
           name: artreid3-jar
           path: build/libs/*.jar
-          retention-days: 90
 
   publish-docker:
     name: Build & Push Docker Image
