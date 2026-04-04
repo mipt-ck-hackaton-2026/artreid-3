@@ -1,6 +1,6 @@
 CREATE TABLE leads (
-    id BIGSERIAL PRIMARY KEY,
-    lead_id VARCHAR(50),
+    lead_id BIGSERIAL PRIMARY KEY,
+    external_lead_id VARCHAR(50),
     manager_id VARCHAR(50),
     pipeline_id INTEGER,
     delivery_service VARCHAR(100),
@@ -8,11 +8,11 @@ CREATE TABLE leads (
 );
 
 CREATE TABLE lead_events (
-    id BIGSERIAL PRIMARY KEY,
-    lead_id VARCHAR(50) NOT NULL,
+    lead_event_id BIGSERIAL PRIMARY KEY,
+    lead_id BIGINT NOT NULL,
     stage_name VARCHAR(50) NOT NULL,
     event_time TIMESTAMP NOT NULL,
-    CONSTRAINT fk_lead FOREIGN KEY(lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    CONSTRAINT fk_lead FOREIGN KEY(lead_id) REFERENCES leads(lead_id) ON DELETE CASCADE,
     CONSTRAINT uq_lead_stage UNIQUE(lead_id, stage_name)
 );
 
