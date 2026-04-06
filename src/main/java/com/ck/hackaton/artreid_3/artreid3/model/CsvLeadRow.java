@@ -33,7 +33,7 @@ public class CsvLeadRow {
     private String managerId;
 
     @CsvBindByName(column = "lead_pipeline_id")
-    private String pipelineId;
+    private Integer pipelineId;
 
     @CsvBindByName(column = "lead_Служба доставки")
     private String deliveryService;
