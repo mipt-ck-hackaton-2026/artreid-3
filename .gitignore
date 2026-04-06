@@ -35,3 +35,23 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+logs/
+*.log
+
+### Local config & secrets ###
+application-local.properties
+.env
+.env.local
+
+### Docker ###
+.dockerignore
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Test and coverage reports ###
+coverage/
+jacoco/
