@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -28,14 +30,16 @@ public class DataImportService {
                     .withType(CsvLeadRow.class)
                     .build();
 
+            List<CsvLeadRow> batch = new ArrayList<>();
             for (CsvLeadRow row : csvToBean) {
-                try {
-                    LeadRowProcessor.RowChangeType rowChangeType = leadRowProcessor.processRow(row);
-                    applyStats(response, rowChangeType);
-                } catch (Exception e) {
-                    log.warn("Failed to process CSV row", e);
-                    response.setErrors(response.getErrors() + 1);
+                batch.add(row);
+                if (batch.size() >= 1000) {
+                    processBatch(batch, response);
+                    batch.clear();
                 }
+            }
+            if (!batch.isEmpty()) {
+                processBatch(batch, response);
             }
 
             return response;
@@ -44,11 +48,15 @@ public class DataImportService {
         }
     }
 
-    private void applyStats(DataLoadResponse response, LeadRowProcessor.RowChangeType changeType) {
-        switch (changeType) {
-            case LOADED -> response.setLoaded(response.getLoaded() + 1);
-            case UPDATED -> response.setUpdated(response.getUpdated() + 1);
-            case UNCHANGED -> response.setSkipped(response.getSkipped() + 1);
+    private void processBatch(List<CsvLeadRow> batch, DataLoadResponse response) {
+        try {
+            LeadRowProcessor.BatchResult result = leadRowProcessor.processBatch(batch);
+            response.setLoaded(response.getLoaded() + result.loaded());
+            response.setUpdated(response.getUpdated() + result.updated());
+            response.setSkipped(response.getSkipped() + result.skipped());
+        } catch (Exception e) {
+            log.warn("Failed to process CSV batch", e);
+            response.setErrors(response.getErrors() + batch.size());
         }
     }
 }

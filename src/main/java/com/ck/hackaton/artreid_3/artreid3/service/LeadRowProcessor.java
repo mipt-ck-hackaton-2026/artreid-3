@@ -4,6 +4,8 @@ import com.ck.hackaton.artreid_3.artreid3.model.CsvLeadRow;
 import com.ck.hackaton.artreid_3.artreid3.model.Lead;
 import com.ck.hackaton.artreid_3.artreid3.model.LeadEvent;
 import com.ck.hackaton.artreid_3.artreid3.model.StageName;
+import com.ck.hackaton.artreid_3.artreid3.repository.LeadBatchRepository;
+import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventBatchRepository;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +17,14 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,61 +32,159 @@ public class LeadRowProcessor {
 
     private final LeadRepository leadRepository;
     private final LeadEventRepository leadEventRepository;
+    private final LeadBatchRepository leadBatchRepository;
+    private final LeadEventBatchRepository leadEventBatchRepository;
+
+    public record BatchResult(int loaded, int updated, int skipped) {}
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public RowChangeType processRow(CsvLeadRow row) {
-        Lead incomingLead = toLead(row);
-        UpsertLeadResult leadResult = upsertLead(incomingLead);
-
-        List<LeadEvent> events = toLeadEvents(row, leadResult.lead());
-        RowChangeType rowChangeType = leadResult.changeType();
-
-        for (LeadEvent event : events) {
-            RowChangeType eventChangeType = upsertEvent(event);
-            rowChangeType = mergeRowChangeType(rowChangeType, eventChangeType);
+    public BatchResult processBatch(List<CsvLeadRow> rows) {
+        if (rows.isEmpty()) {
+            return new BatchResult(0, 0, 0);
         }
 
-        return rowChangeType;
+        Map<String, CsvLeadRow> rowMap = deduplicateRows(rows);
+        List<CsvLeadRow> uniqueRows = new ArrayList<>(rowMap.values());
+        List<String> externalLeadIds = new ArrayList<>(rowMap.keySet());
+
+        Map<String, RowChangeType> rowTypeMap = upsertLeads(uniqueRows, externalLeadIds);
+
+        Map<String, Lead> allLeadsAfterUpsert = fetchLeadsByExternalIds(externalLeadIds);
+
+        processEvents(uniqueRows, allLeadsAfterUpsert, rowTypeMap);
+
+        return computeStats(rows, rowMap, rowTypeMap);
     }
 
-    private UpsertLeadResult upsertLead(Lead incomingLead) {
-        String externalLeadId = incomingLead.getExternalLeadId();
-        if (externalLeadId == null) {
-            throw new IllegalArgumentException("lead_id is required");
+    private Map<String, CsvLeadRow> deduplicateRows(List<CsvLeadRow> rows) {
+        Map<String, CsvLeadRow> rowMap = new LinkedHashMap<>();
+        for (CsvLeadRow row : rows) {
+            String leadId = normalize(row.getLeadId());
+            if (leadId != null) {
+                rowMap.put(leadId, row);
+            }
+        }
+        return rowMap;
+    }
+
+    private Map<String, RowChangeType> upsertLeads(List<CsvLeadRow> uniqueRows, List<String> externalLeadIds) {
+        Map<String, Lead> existingLeads = leadRepository.findByExternalLeadIdIn(externalLeadIds)
+                .stream()
+                .collect(Collectors.toMap(Lead::getExternalLeadId, Function.identity()));
+
+        List<Lead> leadsToUpsert = new ArrayList<>();
+        Map<String, RowChangeType> rowTypeMap = new HashMap<>();
+
+        for (CsvLeadRow row : uniqueRows) {
+            String extId = normalize(row.getLeadId());
+            Lead incoming = toLead(row);
+            Lead existing = existingLeads.get(extId);
+
+            if (existing == null) {
+                rowTypeMap.put(extId, RowChangeType.LOADED);
+                leadsToUpsert.add(incoming);
+            } else {
+                if (updateLeadIfChanged(existing, incoming)) {
+                    rowTypeMap.put(extId, RowChangeType.UPDATED);
+                    leadsToUpsert.add(existing);
+                } else {
+                    rowTypeMap.put(extId, RowChangeType.UNCHANGED);
+                }
+            }
         }
 
-        return leadRepository.findByExternalLeadId(externalLeadId)
-                .map(existingLead -> {
-                    boolean changed = updateLeadIfChanged(existingLead, incomingLead);
-
-                    if (!changed) {
-                        return new UpsertLeadResult(existingLead, RowChangeType.UNCHANGED);
-                    }
-
-                    Lead savedLead = leadRepository.save(existingLead);
-                    return new UpsertLeadResult(savedLead, RowChangeType.UPDATED);
-                })
-                .orElseGet(() -> {
-                    Lead savedLead = leadRepository.save(incomingLead);
-                    return new UpsertLeadResult(savedLead, RowChangeType.LOADED);
-                });
+        leadBatchRepository.batchUpsert(leadsToUpsert);
+        return rowTypeMap;
     }
 
-    private RowChangeType upsertEvent(LeadEvent incomingEvent) {
-        return leadEventRepository.findByLeadAndStageName(incomingEvent.getLead(), incomingEvent.getStageName())
-                .map(existingEvent -> {
-                    if (Objects.equals(existingEvent.getEventTime(), incomingEvent.getEventTime())) {
-                        return RowChangeType.UNCHANGED;
+    private Map<String, Lead> fetchLeadsByExternalIds(List<String> externalLeadIds) {
+        return leadRepository.findByExternalLeadIdIn(externalLeadIds)
+                .stream()
+                .collect(Collectors.toMap(Lead::getExternalLeadId, Function.identity()));
+    }
+
+    private void processEvents(List<CsvLeadRow> uniqueRows,
+                               Map<String, Lead> allLeadsAfterUpsert,
+                               Map<String, RowChangeType> rowTypeMap) {
+        Map<Long, List<LeadEvent>> existingEventsByLead = leadEventRepository
+                .findByLeadIn(allLeadsAfterUpsert.values())
+                .stream()
+                .collect(Collectors.groupingBy(e -> e.getLead().getLeadId()));
+
+        List<LeadEvent> eventsToUpsert = new ArrayList<>();
+
+        for (CsvLeadRow row : uniqueRows) {
+            String extId = normalize(row.getLeadId());
+            Lead leadEntity = allLeadsAfterUpsert.get(extId);
+            RowChangeType currentRowType = rowTypeMap.get(extId);
+
+            if (leadEntity != null) {
+                List<LeadEvent> incomingEvents = toLeadEvents(row, leadEntity);
+                List<LeadEvent> exEvents = existingEventsByLead
+                        .getOrDefault(leadEntity.getLeadId(), Collections.emptyList());
+
+                for (LeadEvent incEv : incomingEvents) {
+                    RowChangeType evType = classifyEvent(incEv, exEvents);
+
+                    if (evType != RowChangeType.UNCHANGED) {
+                        eventsToUpsert.add(incEv);
                     }
 
-                    existingEvent.setEventTime(incomingEvent.getEventTime());
-                    leadEventRepository.save(existingEvent);
-                    return RowChangeType.UPDATED;
-                })
-                .orElseGet(() -> {
-                    leadEventRepository.save(incomingEvent);
-                    return RowChangeType.LOADED;
-                });
+                    currentRowType = mergeRowChangeType(currentRowType, evType);
+                }
+            }
+            rowTypeMap.put(extId, currentRowType);
+        }
+
+        leadEventBatchRepository.batchUpsert(eventsToUpsert);
+    }
+
+    private RowChangeType classifyEvent(LeadEvent incoming, List<LeadEvent> existingEvents) {
+        LeadEvent existing = existingEvents.stream()
+                .filter(e -> e.getStageName() == incoming.getStageName())
+                .findFirst()
+                .orElse(null);
+
+        if (existing == null) {
+            return RowChangeType.LOADED;
+        }
+        if (!Objects.equals(existing.getEventTime(), incoming.getEventTime())) {
+            return RowChangeType.UPDATED;
+        }
+        return RowChangeType.UNCHANGED;
+    }
+
+    private BatchResult computeStats(List<CsvLeadRow> rows,
+                                     Map<String, CsvLeadRow> rowMap,
+                                     Map<String, RowChangeType> rowTypeMap) {
+        int totalLoaded = 0;
+        int totalUpdated = 0;
+        int totalSkipped = 0;
+
+        for (CsvLeadRow row : rows) {
+            String extId = normalize(row.getLeadId());
+            if (extId == null || row != rowMap.get(extId)) {
+                totalSkipped++;
+            } else {
+                RowChangeType type = rowTypeMap.get(extId);
+                if (type == RowChangeType.LOADED) totalLoaded++;
+                else if (type == RowChangeType.UPDATED) totalUpdated++;
+                else totalSkipped++;
+            }
+        }
+
+        return new BatchResult(totalLoaded, totalUpdated, totalSkipped);
+    }
+
+
+    private RowChangeType mergeRowChangeType(RowChangeType rowChangeType, RowChangeType eventChangeType) {
+        if (rowChangeType == RowChangeType.LOADED) {
+            return RowChangeType.LOADED;
+        }
+        if (eventChangeType == RowChangeType.UNCHANGED) {
+            return rowChangeType;
+        }
+        return RowChangeType.UPDATED;
     }
 
     private boolean updateLeadIfChanged(Lead target, Lead source) {
@@ -88,35 +194,20 @@ public class LeadRowProcessor {
             target.setManagerId(source.getManagerId());
             changed = true;
         }
-
         if (!Objects.equals(target.getPipelineId(), source.getPipelineId())) {
             target.setPipelineId(source.getPipelineId());
             changed = true;
         }
-
         if (!Objects.equals(target.getDeliveryService(), source.getDeliveryService())) {
             target.setDeliveryService(source.getDeliveryService());
             changed = true;
         }
-
         if (!Objects.equals(target.getCity(), source.getCity())) {
             target.setCity(source.getCity());
             changed = true;
         }
 
         return changed;
-    }
-
-    private RowChangeType mergeRowChangeType(RowChangeType rowChangeType, RowChangeType eventChangeType) {
-        if (rowChangeType == RowChangeType.LOADED) {
-            return RowChangeType.LOADED;
-        }
-
-        if (eventChangeType == RowChangeType.UNCHANGED) {
-            return rowChangeType;
-        }
-
-        return RowChangeType.UPDATED;
     }
 
     private Lead toLead(CsvLeadRow row) {
@@ -168,12 +259,8 @@ public class LeadRowProcessor {
         if (value == null) {
             return null;
         }
-
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private record UpsertLeadResult(Lead lead, RowChangeType changeType) {
     }
 
     public enum RowChangeType {
