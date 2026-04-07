@@ -157,7 +157,7 @@ public class LeadRowProcessor {
 
     private LocalDateTime parseUnixTimestamp(String value) {
         try {
-            long epochSeconds = Long.parseLong(value);
+            long epochSeconds = Double.valueOf(value).longValue();
             return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneOffset.UTC);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid timestamp value: " + value, e);

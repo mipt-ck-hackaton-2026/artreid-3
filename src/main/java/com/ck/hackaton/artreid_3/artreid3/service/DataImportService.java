@@ -5,6 +5,7 @@ import com.ck.hackaton.artreid_3.artreid3.model.DataLoadResponse;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DataImportService {
@@ -31,6 +33,7 @@ public class DataImportService {
                     LeadRowProcessor.RowChangeType rowChangeType = leadRowProcessor.processRow(row);
                     applyStats(response, rowChangeType);
                 } catch (Exception e) {
+                    log.warn("Failed to process CSV row", e);
                     response.setErrors(response.getErrors() + 1);
                 }
             }
