@@ -1,13 +1,13 @@
 package com.ck.hackaton.artreid_3.artreid3.config;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class SlaConfig {
-
-    private static volatile SlaConfig instance;
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "sla")
+public class SlaConfig {
 
     private int reactionMinutes = 30;
     private int toAssemblyHours = 4;
@@ -16,32 +16,15 @@ public final class SlaConfig {
 
     private int toPvzDays = 5;
     private int pvzStorageDays = 7;
-    private int deliveryTotalDays = 14;  // ← используется в задаче #13
+    private int deliveryTotalDays = 14;
 
     private int fullCycleDays = 16;
 
-    private final int[] shortMinutesBuckets = {15, 60};
-    private final int[] daysBuckets = {1, 3};
+    private int[] shortMinutesBuckets = {15, 60};
+    private int[] daysBuckets = {1, 3};
 
-    public static SlaConfig getInstance() {
-        SlaConfig result = instance;
-        if (result == null) {
-            synchronized (SlaConfig.class) {
-                result = instance;
-                if (result == null) {
-                    instance = result = new SlaConfig();
-                }
-            }
-        }
-        return result;
-    }
 
     public int getDeliverySlaThresholdMinutes() {
         return deliveryTotalDays * 24 * 60;
     }
-
-    public int getFullCycleSlaThresholdMinutes() {
-        return fullCycleDays * 24 * 60;
-    }
-
 }

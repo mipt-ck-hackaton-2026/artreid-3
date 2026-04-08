@@ -1,5 +1,6 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
+import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaMetrics;
 import com.ck.hackaton.artreid_3.artreid3.model.SlaDeliveryRequest;
 import com.ck.hackaton.artreid_3.artreid3.repository.SlaMetricsRepository;
@@ -16,8 +17,11 @@ import java.util.List;
 public class SlaMetricsService {
 
     private final SlaMetricsRepository slaMetricsRepository;
+    private final SlaConfig slaConfig;
 
     public List<ManagerDeliverySlaMetrics> getDeliverySlaByManager(SlaDeliveryRequest request) {
+        int slaThreshold = slaConfig.getDeliverySlaThresholdMinutes();
+
         LocalDateTime dateFrom = request.getDateFrom() != null
                 ? request.getDateFrom()
                 : LocalDateTime.now().minusDays(30);
@@ -28,7 +32,8 @@ public class SlaMetricsService {
         return slaMetricsRepository.findDeliverySlaByManager(
                 dateFrom,
                 dateTo,
-                request.getManagerId()
+                request.getManagerId(),
+                slaThreshold
         );
     }
 }

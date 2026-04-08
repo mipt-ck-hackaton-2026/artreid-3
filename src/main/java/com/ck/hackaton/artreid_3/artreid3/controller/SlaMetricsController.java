@@ -22,7 +22,7 @@ public class SlaMetricsController {
     public ResponseEntity<List<ManagerDeliverySlaMetrics>> getDeliverySlaByManager(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
-            @RequestParam(required = true) String managerId) {
+            @RequestParam(required = false) String managerId) {
 
         SlaDeliveryRequest request = SlaDeliveryRequest.builder()
                 .dateFrom(dateFrom)

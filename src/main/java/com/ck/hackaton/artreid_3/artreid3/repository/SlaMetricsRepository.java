@@ -1,6 +1,5 @@
 package com.ck.hackaton.artreid_3.artreid3.repository;
 
-import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -8,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ public class SlaMetricsRepository {
                     ON l.lead_id = le_end.lead_id 
                     AND le_end.stage_name = 'RECEIVED'
                 WHERE le_start.event_time BETWEEN :dateFrom AND :dateTo
-                  AND (:managerId IS NULL OR l.manager_id = :managerId)
+                  AND (:managerId::VARCHAR IS NULL OR l.manager_id = :managerId::VARCHAR)
             ),
             metrics AS (
                 SELECT 
@@ -71,21 +71,20 @@ public class SlaMetricsRepository {
                     .build();
 
     private static BigDecimal roundBigDecimal(BigDecimal value) {
-        return value != null ? value.setScale(2, BigDecimal.ROUND_HALF_UP) : null;
+        return value != null ? value.setScale(2, RoundingMode.HALF_UP) : null;
     }
 
     public List<ManagerDeliverySlaMetrics> findDeliverySlaByManager(
             LocalDateTime dateFrom,
             LocalDateTime dateTo,
-            String managerId) {
-
-        int slaThreshold = SlaConfig.getInstance().getDeliverySlaThresholdMinutes();
+            String managerId,
+            int slaThresholdMinutes) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateFrom", dateFrom);
         params.put("dateTo", dateTo);
         params.put("managerId", managerId);
-        params.put("slaThreshold", slaThreshold);
+        params.put("slaThreshold", slaThresholdMinutes);
 
         return namedParameterJdbcTemplate.query(DELIVERY_SLA_QUERY, params, ROW_MAPPER);
     }
