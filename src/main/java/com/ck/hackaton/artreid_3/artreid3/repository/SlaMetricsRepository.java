@@ -24,7 +24,6 @@ public class SlaMetricsRepository {
                 SELECT 
                     l.lead_id,
                     l.manager_id,
-                    l.delivery_service,
                     EXTRACT(EPOCH FROM (le_end.event_time - le_start.event_time)) / 60 AS interval_min
                 FROM leads l
                 JOIN lead_events le_start 
@@ -33,7 +32,7 @@ public class SlaMetricsRepository {
                 JOIN lead_events le_end 
                     ON l.lead_id = le_end.lead_id 
                     AND le_end.stage_name = 'RECEIVED'
-                WHERE le_start.event_time BETWEEN :dateFrom AND :dateTo
+                WHERE le_end.event_time BETWEEN :dateFrom AND :dateTo
                   AND (:managerId::VARCHAR IS NULL OR l.manager_id = :managerId::VARCHAR)
             ),
             metrics AS (
@@ -54,21 +53,21 @@ public class SlaMetricsRepository {
                 median_val,
                 p90_val,
                 within_sla_count,
-                (within_sla_count::float / NULLIF(total_count, 0) * 100) as within_sla_percent
+                (within_sla_count::NUMERIC / NULLIF(total_count, 0) * 100) as within_sla_percent
             FROM metrics
             ORDER BY manager_id
             """;
 
     private static final RowMapper<ManagerDeliverySlaMetrics> ROW_MAPPER = (rs, rowNum) ->
-            ManagerDeliverySlaMetrics.builder()
-                    .managerId(rs.getString("manager_id"))
-                    .totalCount(rs.getLong("total_count"))
-                    .avgMinutes(rs.getBigDecimal("avg_val"))
-                    .medianMinutes(rs.getBigDecimal("median_val"))
-                    .p90Minutes(rs.getBigDecimal("p90_val"))
-                    .withinSlaCount(rs.getLong("within_sla_count"))
-                    .withinSlaPercent(roundBigDecimal(rs.getBigDecimal("within_sla_percent")))
-                    .build();
+            new ManagerDeliverySlaMetrics(
+                    rs.getString("manager_id"),
+                    rs.getLong("total_count"),
+                    rs.getBigDecimal("avg_val"),
+                    rs.getBigDecimal("median_val"),
+                    rs.getBigDecimal("p90_val"),
+                    rs.getLong("within_sla_count"),
+                    roundBigDecimal(rs.getBigDecimal("within_sla_percent"))
+            );
 
     private static BigDecimal roundBigDecimal(BigDecimal value) {
         return value != null ? value.setScale(2, RoundingMode.HALF_UP) : null;
