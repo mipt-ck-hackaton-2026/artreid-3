@@ -38,8 +38,11 @@ class SlaMetricsServiceTest {
         when(slaMetricsRepository.findDeliverySlaByManager(any(), any(), isNull(), eq(20160)))
                 .thenReturn(List.of());
 
+        LocalDateTime testStartTime = LocalDateTime.now();
+
         slaMetricsService.getDeliverySlaByManager(request);
 
+        // Assert
         ArgumentCaptor<LocalDateTime> fromCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         ArgumentCaptor<LocalDateTime> toCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
 
@@ -50,9 +53,13 @@ class SlaMetricsServiceTest {
         LocalDateTime capturedFrom = fromCaptor.getValue();
         LocalDateTime capturedTo = toCaptor.getValue();
 
-        assertThat(capturedFrom).isBefore(LocalDateTime.now().minusDays(29));
-        assertThat(capturedFrom).isAfter(LocalDateTime.now().minusDays(31));
-        assertThat(capturedTo).isAfterOrEqualTo(LocalDateTime.now());
+        assertThat(capturedFrom).isBefore(testStartTime.minusDays(29));
+        assertThat(capturedFrom).isAfter(testStartTime.minusDays(31));
+
+        assertThat(capturedTo).isBetween(
+                testStartTime.minusSeconds(1),
+                testStartTime.plusSeconds(1)
+        );
     }
 
     @Test
