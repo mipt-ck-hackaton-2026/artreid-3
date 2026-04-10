@@ -11,17 +11,22 @@ import lombok.Setter;
 public class Lead {
 
     @Id
-    @Column(name = "lead_id", nullable = false)
-    private String leadId; // ← PK из CSV, например "LEAD_0172"
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "lead_id")
+    private Long leadId;
 
-    @Column(name = "lead_responsible_user_id")
-    private String leadResponsibleUserId;
+    @Column(name = "external_lead_id", length = 50)
+    private String externalLeadId;
 
-    @Column(name = "lead_created_at")
-    private Long leadCreatedAt; // Unix timestamp (секунды)
+    @Column(name = "manager_id", length = 50)
+    private String managerId;
 
-    @Column(name = "sale_ts")
-    private Long saleTs; // Unix timestamp (секунды)
+    @Column(name = "pipeline_id")
+    private Integer pipelineId;
 
-    // Остальные поля можно добавить позже при необходимости
+    @Column(name = "delivery_service", length = 100)
+    private String deliveryService;
+
+    @Column(name = "city", length = 100)
+    private String city;
 }

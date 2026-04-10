@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "sla.b2c")
 public class SlaConfig {
-    private int firstResponseNormativeMinutes = 10;
+    private int firstResponseNormativeMinutes = 30;
 
     public int getFirstResponseNormativeMinutes() {
         return firstResponseNormativeMinutes;

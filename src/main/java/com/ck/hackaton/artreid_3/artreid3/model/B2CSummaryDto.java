@@ -1,12 +1,38 @@
 package com.ck.hackaton.artreid_3.artreid3.model;
 
+import lombok.Builder;
 import lombok.Value;
+import java.util.Map;
 
 @Value
+@Builder
 public class B2CSummaryDto {
-    double averageFirstResponseMinutes;
-    double percentile90FirstResponseMinutes;
+    // Основные метрики
     long totalLeads;
     long withinSlaCount;
     long violatedSlaCount;
+    double withinSlaPercent;
+    double violatedSlaPercent;
+
+    // Статистика времени реакции
+    double averageFirstResponseMinutes;
+    double medianFirstResponseMinutes;
+    double percentile90FirstResponseMinutes;
+    double minMinutes;
+    double maxMinutes;
+
+    // Распределение нарушений по интервалам
+    Map<String, Long> breachDistribution;
+
+    // Детализация по менеджерам (если нужно)
+    Map<String, ManagerStats> managerStats;
+
+    @Value
+    @Builder
+    public static class ManagerStats {
+        long totalLeads;
+        long withinSlaCount;
+        double averageMinutes;
+        double percentile90Minutes;
+    }
 }

@@ -26,7 +26,8 @@ public class SlaController {
         this.b2CSlaService = b2CSlaService;
     }
 
-    @GetMapping("/com/ck/hackaton/artreid_3/artreid3/config")
+    // ИСПРАВЛЕНО: правильный путь для конфигурации
+    @GetMapping("/config")
     public SlaConfigDto getConfig() {
         return new SlaConfigDto(slaConfig.getFirstResponseNormativeMinutes());
     }
@@ -36,11 +37,11 @@ public class SlaController {
             @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
             @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo,
             @RequestParam(required = false) String managerId,
-            @RequestParam(required = false) String qualification // игнорируем — нет в данных
+            @RequestParam(required = false) String qualification
     ) {
         if (dateFrom.isAfter(dateTo)) {
             throw new IllegalArgumentException("dateFrom must be <= dateTo");
         }
-        return b2CSlaService.calculateSummary(dateFrom, dateTo, managerId);
+        return b2CSlaService.calculateSummary(dateFrom, dateTo, managerId, qualification);
     }
 }
