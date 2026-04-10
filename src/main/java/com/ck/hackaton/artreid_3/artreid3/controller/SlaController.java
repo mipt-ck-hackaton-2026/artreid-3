@@ -5,12 +5,11 @@ import com.ck.hackaton.artreid_3.artreid3.model.B2CSummaryDto;
 import com.ck.hackaton.artreid_3.artreid3.model.SlaConfigDto;
 import com.ck.hackaton.artreid_3.artreid3.service.B2CSlaService;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO;
 
@@ -26,7 +25,6 @@ public class SlaController {
         this.b2CSlaService = b2CSlaService;
     }
 
-    // ИСПРАВЛЕНО: правильный путь для конфигурации
     @GetMapping("/config")
     public SlaConfigDto getConfig() {
         return new SlaConfigDto(slaConfig.getFirstResponseNormativeMinutes());
@@ -43,5 +41,25 @@ public class SlaController {
             throw new IllegalArgumentException("dateFrom must be <= dateTo");
         }
         return b2CSlaService.calculateSummary(dateFrom, dateTo, managerId, qualification);
+    }
+}
+
+/**
+ * Глобальный обработчик исключений для контроллеров
+ */
+@RestControllerAdvice
+class GlobalExceptionHandler {
+
+    /**
+     * Обработка ошибки валидации дат
+     * Возвращает HTTP 400 BAD_REQUEST вместо 500 INTERNAL_SERVER_ERROR
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleIllegalArgument(IllegalArgumentException e) {
+        return Map.of(
+                "error", e.getMessage(),
+                "status", String.valueOf(HttpStatus.BAD_REQUEST.value())
+        );
     }
 }
