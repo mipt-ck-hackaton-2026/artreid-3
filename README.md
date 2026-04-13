@@ -40,7 +40,7 @@
 | **Docker Compose** | v2      | Опционально — для локального окружения                |
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Быстрый старт (Запуск одной командой)
 
 ### 1. Клонируйте репозиторий
 
@@ -49,31 +49,24 @@ git clone https://github.com/mipt-ck-hackaton-2026/artreid-3.git
 cd artreid-3
 ```
 
-### 2. Запустите базу данных
+### 2. Запуск приложения (одна из команд на выбор)
 
-Проект использует **Spring Boot Docker Compose** интеграцию — при запуске в dev-режиме PostgreSQL поднимется автоматически из `compose.yaml`:
+Проект можно запустить **полностью одной командой**, как требуют правила. Выберите любой удобный вариант:
 
-```bash
-# База поднимется автоматически при запуске приложения (см. шаг 3)
-# Либо можно запустить вручную:
-docker compose up -d
-```
-
-> **📌 Параметры базы по умолчанию (dev):**
-> - DB: `mydatabase`
-> - User: `myuser`
-> - Password: `secret`
-> - Port: назначается динамически (Spring Boot Docker Compose подхватит автоматически)
-
-### 3. Запустите приложение
-
+**Вариант А: Через Gradle (Локальная разработка)**
+Автоматически поднимает базу данных (через Spring Boot Docker Compose) и запускает приложение:
 ```bash
 ./gradlew bootRun
 ```
 
+**Вариант Б: Через Docker Compose (Запуск всего стека: БД + Приложение)**
+```bash
+docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
+```
+
 Приложение запустится на `http://localhost:8080`.
 
-### 4. Проверьте что всё работает
+### 3. Проверьте что всё работает
 
 ```bash
 curl http://localhost:8080/api/health
@@ -388,28 +381,28 @@ docker run -p 8080:8080 \
   artreid3:latest
 ```
 
-### Docker Compose — локальная разработка
+### Docker Compose — запуск проекта одной командой
 
-Файл `compose.yaml` в корне содержит только PostgreSQL для dev-режима. Spring Boot Docker Compose интеграция подхватит его автоматически при `./gradlew bootRun`.
+Для автоматического запуска приложения и базы данных используйте единую команду `docker-compose`:
 
 ```bash
-# Ручной запуск (если нужно)
-docker compose up -d
+# Запуск полного стека (приложение + БД)
+docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
+```
+*(Поддерживается как `docker-compose`, так и `docker compose`)*
 
-# Остановка
-docker compose down
+```bash
+# Остановка с удалением volumes
+docker-compose -f dockerfiles_prod/docker-compose.yml down -v
 ```
 
-### Docker Compose — продакшен
+### Spring Boot Docker Compose (dev-режим)
 
-Файл `dockerfiles_prod/docker-compose.yml` содержит полный стек (приложение + БД):
+Файл `compose.yaml` в корне содержит только PostgreSQL для локальной разработки. Но благодаря Spring Boot Docker Compose интеграции **отдельно базу поднимать не нужно**. Достаточно запустить приложение через Gradle:
 
 ```bash
-# Запуск prod-стека
-docker compose -f dockerfiles_prod/docker-compose.yml up -d
-
-# Остановка с удалением volumes
-docker compose -f dockerfiles_prod/docker-compose.yml down -v
+# Эта команда автоматически поднимет БД в Docker и запустит приложение
+./gradlew bootRun
 ```
 
 **Параметры продакшен-окружения:**
