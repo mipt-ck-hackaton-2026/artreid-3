@@ -2,6 +2,7 @@ package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaResponse;
+import com.ck.hackaton.artreid_3.artreid3.model.DeliverySummaryResponse;
 import com.ck.hackaton.artreid_3.artreid3.model.SlaDeliveryRequest;
 import com.ck.hackaton.artreid_3.artreid3.repository.SlaMetricsRepository;
 import org.junit.jupiter.api.Test;
@@ -60,5 +61,21 @@ class SlaMetricsServiceTest {
                 testStartTime.minusSeconds(1),
                 testStartTime.plusSeconds(1)
         );
+    }
+
+    @Test
+    void shouldCallRepository_forSummary() {
+        SlaDeliveryRequest request = SlaDeliveryRequest.builder().build();
+        when(slaConfig.getToPvzDays()).thenReturn(5);
+        when(slaConfig.getPvzStorageDays()).thenReturn(7);
+        when(slaConfig.getDeliveryTotalDays()).thenReturn(14);
+        
+        DeliverySummaryResponse.DeliverySummaryMetrics metrics = DeliverySummaryResponse.DeliverySummaryMetrics.builder().build();
+        when(slaMetricsRepository.findDeliverySummary(any(), any(), isNull(), isNull(), isNull(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(metrics);
+
+        slaMetricsService.getDeliverySummary(request);
+
+        verify(slaMetricsRepository).findDeliverySummary(any(), any(), isNull(), isNull(), isNull(), eq(7200), eq(10080), eq(20160));
     }
 }
