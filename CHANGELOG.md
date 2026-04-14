@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.4.0...v1.5.0) (2026-04-14)
+
+
+### Features
+
+* **delivery:** add delivery SLA summary endpoint with native SQL ([426778b](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/426778b5069c6b1bb33eef83fb871aa58e43d5b1))
+
 # [1.4.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.3.0...v1.4.0) (2026-04-14)
 
 
