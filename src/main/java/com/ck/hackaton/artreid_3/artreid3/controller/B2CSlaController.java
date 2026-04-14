@@ -1,7 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
-import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryDto;
+import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.SlaConfigDto;
 import com.ck.hackaton.artreid_3.artreid3.service.B2CSlaService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,7 +29,7 @@ public class B2CSlaController {
     }
 
     @GetMapping("/summary")
-    public B2CSummaryDto getB2CSummary(
+    public B2CSummaryResponseDTO getB2CSummary(
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo,
             @RequestParam(required = false) String managerId,

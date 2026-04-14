@@ -1,128 +1,54 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
-import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryDto;
-import com.ck.hackaton.artreid_3.artreid3.model.Lead;
-import com.ck.hackaton.artreid_3.artreid3.model.LeadEvent;
-import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
-import com.ck.hackaton.artreid_3.artreid3.repository.LeadRepository;
+import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO;
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.Period;
+import com.ck.hackaton.artreid_3.artreid3.repository.B2CMetricsRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class B2CSlaService {
 
-    private final LeadRepository leadRepository;
-    private final LeadEventRepository leadEventRepository;
+    private final B2CMetricsRepository b2cMetricsRepository;
     private final SlaConfig slaConfig;
 
-    public B2CSlaService(LeadRepository leadRepository,
-                         LeadEventRepository leadEventRepository,
-                         SlaConfig slaConfig) {
-        this.leadRepository = leadRepository;
-        this.leadEventRepository = leadEventRepository;
-        this.slaConfig = slaConfig;
-    }
+    public B2CSummaryResponseDTO calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
+        int sla1Threshold = slaConfig.getReactionMinutes();
+        int sla2Threshold = slaConfig.getToAssemblyHours() * 60;
+        int sla3Threshold = slaConfig.getAssemblyToDeliveryDays() * 24 * 60;
+        int b2cThreshold = slaConfig.getB2cTotalDays() * 24 * 60;
 
-    public B2CSummaryDto calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
         LocalDateTime start = dateFrom.atStartOfDay();
         LocalDateTime end = dateTo.plusDays(1).atStartOfDay();
-        List<Object[]> eventTimes = leadEventRepository.findResponseTimesByManagerAndDate(managerId, start, end);
-        
-        List<Double> responseMinutes = new ArrayList<>();
 
-        for (Object[] times : eventTimes) {
-            LocalDateTime createdTime = (LocalDateTime) times[0];
-            LocalDateTime saleTime = (LocalDateTime) times[1];
-            
-            if (createdTime != null && saleTime != null) {
-                long diffSeconds = java.time.Duration.between(createdTime, saleTime).getSeconds();
-                double minutes = diffSeconds / 60.0;
-                responseMinutes.add(minutes);
-            }
-        }
+        B2CSummaryResponseDTO.B2CSummaryMetrics metrics = b2cMetricsRepository.findB2CSummary(
+                start,
+                end,
+                managerId,
+                qualification,
+                sla1Threshold,
+                sla2Threshold,
+                sla3Threshold,
+                b2cThreshold);
 
-        if (responseMinutes.isEmpty()) {
-            return createEmptySummary();
-        }
-
-        int normative = slaConfig.getFirstResponseNormativeMinutes();
-
-        long withinSla = responseMinutes.stream().filter(m -> m <= normative).count();
-        long violatedSla = responseMinutes.size() - withinSla;
-
-        Map<String, Long> breachDistribution = new LinkedHashMap<>();
-        long under15 = responseMinutes.stream().filter(m -> m <= 15).count();
-        long between15and60 = responseMinutes.stream().filter(m -> m > 15 && m <= 60).count();
-        long between1and4hours = responseMinutes.stream().filter(m -> m > 60 && m <= 240).count();
-        long over4hours = responseMinutes.stream().filter(m -> m > 240).count();
-
-        breachDistribution.put("≤15 мин", under15);
-        breachDistribution.put("15-60 мин", between15and60);
-        breachDistribution.put("1-4 ч", between1and4hours);
-        breachDistribution.put(">4 ч", over4hours);
-
-        return B2CSummaryDto.builder()
-                .totalLeads(responseMinutes.size())
-                .withinSlaCount(withinSla)
-                .violatedSlaCount(violatedSla)
-                .withinSlaPercent((withinSla * 100.0) / responseMinutes.size())
-                .violatedSlaPercent((violatedSla * 100.0) / responseMinutes.size())
-                .averageFirstResponseMinutes(average(responseMinutes))
-                .medianFirstResponseMinutes(median(responseMinutes))
-                .percentile90FirstResponseMinutes(percentile(responseMinutes, 90))
-                .minMinutes(responseMinutes.stream().min(Double::compare).orElse(0.0))
-                .maxMinutes(responseMinutes.stream().max(Double::compare).orElse(0.0))
-                .breachDistribution(breachDistribution)
-                .managerStats(new HashMap<>())
+        return B2CSummaryResponseDTO.builder()
+                .pipeline("b2c")
+                .period(Period.builder()
+                        .from(dateFrom.toString())
+                        .to(dateTo.toString())
+                        .build())
+                .metrics(metrics)
                 .build();
     }
 
-    public B2CSummaryDto calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId) {
+    public B2CSummaryResponseDTO calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId) {
         return calculateSummary(dateFrom, dateTo, managerId, null);
-    }
-
-    private double average(List<Double> values) {
-        return values.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-    }
-
-    private double median(List<Double> values) {
-        if (values.isEmpty()) return 0.0;
-        List<Double> sorted = new ArrayList<>(values);
-        Collections.sort(sorted);
-        int size = sorted.size();
-        if (size % 2 == 0) {
-            return (sorted.get(size/2 - 1) + sorted.get(size/2)) / 2.0;
-        }
-        return sorted.get(size/2);
-    }
-
-    private double percentile(List<Double> values, double p) {
-        if (values.isEmpty()) return 0.0;
-        List<Double> sorted = new ArrayList<>(values);
-        Collections.sort(sorted);
-        int index = (int) Math.ceil(p / 100.0 * sorted.size()) - 1;
-        return sorted.get(Math.max(0, Math.min(index, sorted.size() - 1)));
-    }
-
-    private B2CSummaryDto createEmptySummary() {
-        return B2CSummaryDto.builder()
-                .totalLeads(0)
-                .withinSlaCount(0)
-                .violatedSlaCount(0)
-                .withinSlaPercent(0.0)
-                .violatedSlaPercent(0.0)
-                .averageFirstResponseMinutes(0.0)
-                .medianFirstResponseMinutes(0.0)
-                .percentile90FirstResponseMinutes(0.0)
-                .minMinutes(0.0)
-                .maxMinutes(0.0)
-                .breachDistribution(new HashMap<>())
-                .managerStats(new HashMap<>())
-                .build();
     }
 }
