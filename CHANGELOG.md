@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.3.0...v1.4.0) (2026-04-14)
+
+
+### Features
+
+* add delivery manager, qualification, and lifecycle status fields to LeadBatchRepository upsert logic ([baf8a6e](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/baf8a6e7475f450af151e459869092ab7d3a3914))
+* update SLA metrics calculation with new lead columns and granular delivery performance tracking ([b10ce76](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/b10ce769774481810e0572f8ef2e4aa0717b3348))
+
 # [1.3.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.2.0...v1.3.0) (2026-04-14)
 
 
