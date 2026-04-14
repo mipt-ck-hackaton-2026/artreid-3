@@ -49,4 +49,16 @@ public class CsvLeadRow {
 
     @CsvBindByName(column = "contact_Город")
     private String city;
+
+    @CsvBindByName(column = "lead_Квалификация лида")
+    private String leadQualification;
+
+    @CsvBindByName(column = "lead_Ответственный за доставку")
+    private String deliveryManagerId;
+
+    @CsvBindByName(column = "outcome_unknown")
+    private String outcomeUnknown;
+
+    @CsvBindByName(column = "lifecycle_incomplete")
+    private String lifecycleIncomplete;
 }

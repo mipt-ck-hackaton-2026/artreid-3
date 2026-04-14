@@ -16,5 +16,7 @@ import java.time.LocalDateTime;
 public class SlaDeliveryRequest {
     private LocalDateTime dateFrom;
     private LocalDateTime dateTo;
-    private String managerId;
+    private String deliveryManagerId;
+    private String leadQualification;
+    private String deliveryService;
 }
