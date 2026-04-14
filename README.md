@@ -164,10 +164,13 @@ artreid-3/
 │   │   ├── java/com/ck/hackaton/artreid_3/artreid3/
 │   │   │   ├── Artreid3Application.java       # Точка входа
 │   │   │   ├── controller/                    # REST-контроллеры
-│   │   │   │   └── HealthController.java      # GET /api/health
-│   │   │   ├── service/                       # Бизнес-логика
-│   │   │   ├── repository/                    # Spring Data JPA репозитории
-│   │   │   └── model/                         # JPA-сущности и DTO
+│   │   │   │   ├── HealthController.java      # GET /api/health
+│   │   │   │   ├── DataLoadController.java    # POST /api/data/load
+│   │   │   │   └── SlaMetricsController.java  # GET /api/sla/delivery/by-manager
+│   │   │   ├── service/                       # Бизнес-логика (импорт, SLA метрики)
+│   │   │   ├── repository/                    # Spring Data JPA и JDBC Batch
+│   │   │   ├── model/                         # JPA-сущности и DTO
+│   │   │   └── config/                        # Конфигурации (напр. SlaConfig)
 │   │   └── resources/
 │   │       ├── application.properties         # Конфигурация приложения
 │   │       ├── db/changelog/
@@ -230,6 +233,10 @@ artreid-3/
 
 ```properties
 spring.application.name=artreid3
+
+# Настройки загрузки файлов (для импорта CSV)
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=50MB
 ```
 
 ### Переменные окружения
@@ -242,6 +249,14 @@ spring.application.name=artreid3
 | `SPRING_DATASOURCE_USERNAME`     | Имя пользователя БД          | `artreid3`                                  |
 | `SPRING_DATASOURCE_PASSWORD`     | Пароль пользователя БД       | `artreid3`                                  |
 | `SPRING_JPA_HIBERNATE_DDL_AUTO`  | Стратегия DDL (prod: validate)| `validate`                                 |
+
+### Настройки логов и SLA
+
+Метрики SLA (ожидания по времени на каждом этапе воронки продаж) заданы по умолчанию в `SlaConfig.java`. В `application.properties` можно переопределить их с префиксом `sla.*`:
+
+- `sla.reaction-minutes=30` (Ожидание реакции)
+- `sla.delivery-total-days=14` (Общее время доставки)
+и др.
 
 ---
 
@@ -257,9 +272,11 @@ spring.application.name=artreid3
 
 ### Доступные эндпоинты
 
-| Метод | Путь            | Описание                                   |
-|-------|-----------------|--------------------------------------------|
-| GET   | `/api/health`   | Проверка состояния приложения и его версии  |
+| Метод | Путь                               | Описание                                                                            |
+|-------|------------------------------------|-------------------------------------------------------------------------------------|
+| GET   | `/api/health`                      | Проверка состояния приложения и его версии                                          |
+| POST  | `/api/data/load`                   | Загрузка датасета лидов из CSV-файла (используется быстрый batch-upsert до 50MB)    |
+| GET   | `/api/sla/delivery/by-manager`     | Получение SLA-метрик (avg, median, p90, compliance %) по менеджерам                 |
 
 ---
 
@@ -600,6 +617,13 @@ docker build -t artreid3:latest .
 docker compose down -v
 docker compose up -d
 ```
+
+---
+
+## 🛠 Вспомогательные скрипты (Utils)
+
+В папке `utils/` находятся вспомогательные скрипты для работы с данными:
+- `utils/header_explorer/extract_headers.py` — Python-скрипт для быстрого извлечения названий колонок (заголовков) из большого сырого массива `dataset.csv` в человекочитаемый вид без загрузки всего файла в память.
 
 ---
 
