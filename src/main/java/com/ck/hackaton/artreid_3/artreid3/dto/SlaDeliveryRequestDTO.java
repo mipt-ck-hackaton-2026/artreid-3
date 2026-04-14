@@ -1,4 +1,4 @@
-package com.ck.hackaton.artreid_3.artreid3.model;
+package com.ck.hackaton.artreid_3.artreid3.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SlaDeliveryRequest {
+public class SlaDeliveryRequestDTO {
     private LocalDateTime dateFrom;
     private LocalDateTime dateTo;
     private String deliveryManagerId;

@@ -1,7 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
-import com.ck.hackaton.artreid_3.artreid3.model.B2CSummaryDto;
+import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryDto;
 import com.ck.hackaton.artreid_3.artreid3.model.Lead;
 import com.ck.hackaton.artreid_3.artreid3.model.LeadEvent;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
@@ -29,40 +29,20 @@ public class B2CSlaService {
     }
 
     public B2CSummaryDto calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
-        List<Lead> allLeads = leadRepository.findAll();
+        LocalDateTime start = dateFrom.atStartOfDay();
+        LocalDateTime end = dateTo.plusDays(1).atStartOfDay();
+        List<Object[]> eventTimes = leadEventRepository.findResponseTimesByManagerAndDate(managerId, start, end);
+        
         List<Double> responseMinutes = new ArrayList<>();
 
-        for (Lead lead : allLeads) {
-            // Фильтр по менеджеру
-            if (managerId != null && !managerId.isEmpty() && !managerId.equals(lead.getManagerId())) {
-                continue;
-            }
-
-            // Получаем события
-            List<LeadEvent> events = leadEventRepository.findByLeadIdAndStageNames(
-                    lead.getLeadId(),
-                    Arrays.asList(com.ck.hackaton.artreid_3.artreid3.model.StageName.CREATED, com.ck.hackaton.artreid_3.artreid3.model.StageName.SALE)
-            );
-
-            LocalDateTime createdTime = null;
-            LocalDateTime saleTime = null;
-
-            for (LeadEvent event : events) {
-                if (com.ck.hackaton.artreid_3.artreid3.model.StageName.CREATED.equals(event.getStageName())) {
-                    createdTime = event.getEventTime();
-                } else if (com.ck.hackaton.artreid_3.artreid3.model.StageName.SALE.equals(event.getStageName())) {
-                    saleTime = event.getEventTime();
-                }
-            }
-
+        for (Object[] times : eventTimes) {
+            LocalDateTime createdTime = (LocalDateTime) times[0];
+            LocalDateTime saleTime = (LocalDateTime) times[1];
+            
             if (createdTime != null && saleTime != null) {
-                LocalDate eventDate = createdTime.toLocalDate();
-                // Фильтр по дате (включительно)
-                if (!eventDate.isBefore(dateFrom) && !eventDate.isAfter(dateTo)) {
-                    long diffSeconds = java.time.Duration.between(createdTime, saleTime).getSeconds();
-                    double minutes = diffSeconds / 60.0;
-                    responseMinutes.add(minutes);
-                }
+                long diffSeconds = java.time.Duration.between(createdTime, saleTime).getSeconds();
+                double minutes = diffSeconds / 60.0;
+                responseMinutes.add(minutes);
             }
         }
 

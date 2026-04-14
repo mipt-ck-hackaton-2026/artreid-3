@@ -1,4 +1,4 @@
-package com.ck.hackaton.artreid_3.artreid3.model;
+package com.ck.hackaton.artreid_3.artreid3.dto;
 
 import lombok.Builder;
 import lombok.Value;
