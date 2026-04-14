@@ -18,13 +18,25 @@ public class LeadBatchRepository {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String UPSERT_SQL = """
-            INSERT INTO leads (external_lead_id, manager_id, pipeline_id, delivery_service, city)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT (external_lead_id) DO UPDATE SET
-                manager_id = EXCLUDED.manager_id,
-                pipeline_id = EXCLUDED.pipeline_id,
-                delivery_service = EXCLUDED.delivery_service,
-                city = EXCLUDED.city
+            MERGE INTO leads t
+            USING (VALUES (CAST(? AS VARCHAR), CAST(? AS VARCHAR), CAST(? AS INTEGER), CAST(? AS VARCHAR), CAST(? AS VARCHAR),
+                           CAST(? AS VARCHAR), CAST(? AS VARCHAR), CAST(? AS BOOLEAN), CAST(? AS BOOLEAN)))
+                s (external_lead_id, manager_id, pipeline_id, delivery_service, city,
+                   delivery_manager_id, lead_qualification, outcome_unknown, lifecycle_incomplete)
+            ON (t.external_lead_id = s.external_lead_id)
+            WHEN MATCHED THEN UPDATE SET
+                manager_id = s.manager_id,
+                pipeline_id = s.pipeline_id,
+                delivery_service = s.delivery_service,
+                city = s.city,
+                delivery_manager_id = s.delivery_manager_id,
+                lead_qualification = s.lead_qualification,
+                outcome_unknown = s.outcome_unknown,
+                lifecycle_incomplete = s.lifecycle_incomplete
+            WHEN NOT MATCHED THEN INSERT (external_lead_id, manager_id, pipeline_id, delivery_service, city,
+                                          delivery_manager_id, lead_qualification, outcome_unknown, lifecycle_incomplete)
+            VALUES (s.external_lead_id, s.manager_id, s.pipeline_id, s.delivery_service, s.city,
+                    s.delivery_manager_id, s.lead_qualification, s.outcome_unknown, s.lifecycle_incomplete)
             """;
 
     public void batchUpsert(List<Lead> leads) {
@@ -45,6 +57,18 @@ public class LeadBatchRepository {
                 }
                 ps.setString(4, lead.getDeliveryService());
                 ps.setString(5, lead.getCity());
+                ps.setString(6, lead.getDeliveryManagerId());
+                ps.setString(7, lead.getLeadQualification());
+                if (lead.getOutcomeUnknown() != null) {
+                    ps.setBoolean(8, lead.getOutcomeUnknown());
+                } else {
+                    ps.setBoolean(8, false);
+                }
+                if (lead.getLifecycleIncomplete() != null) {
+                    ps.setBoolean(9, lead.getLifecycleIncomplete());
+                } else {
+                    ps.setBoolean(9, false);
+                }
             }
 
             @Override

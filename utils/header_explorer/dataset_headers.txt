@@ -1,0 +1,194 @@
+Headers for dataset.csv:
+========================
+
+1. lead_id
+2. sale_ts
+3. sale_date
+4. buyout_flag
+5. outcome_unknown
+6. handed_to_delivery_ts
+7. issued_or_pvz_ts
+8. received_ts
+9. rejected_ts
+10. returned_ts
+11. days_sale_to_handed
+12. days_handed_to_issued_pvz
+13. days_to_outcome
+14. lifecycle_incomplete
+15. current_status_id
+16. closed_ts
+17. lead_name
+18. lead_price
+19. lead_responsible_user_id
+20. lead_group_id
+21. lead_status_id
+22. lead_pipeline_id
+23. lead_loss_reason_id
+24. lead_created_at
+25. lead_updated_at
+26. lead_closed_at
+27. lead_is_deleted
+28. lead_account_id
+29. lead_tags
+30. lead_TRANID
+31. lead_utm_source
+32. lead_utm_medium
+33. lead_utm_campaign
+34. lead_utm_content
+35. lead_utm_term
+36. lead_utm_group
+37. lead_utm_sky
+38. lead__ym_uid
+39. lead_yclid
+40. lead_FORMID
+41. lead_roistat
+42. lead_COOKIES
+43. lead_REFERER
+44. lead_utm_referrer
+45. lead_Служба доставки
+46. lead_Вид оплаты
+47. lead_Компания Отправитель
+48. lead_Проблема
+49. lead_Комментарий
+50. lead_Состав заказа
+51. lead_group
+52. lead_Номер отправления СДЭК
+53. lead_Оплата МОП
+54. lead_Дата получения денег на Р/С
+55. contact_id
+56. contact_name
+57. contact_first_name
+58. contact_last_name
+59. contact_responsible_user_id
+60. contact_created_at
+61. contact_updated_at
+62. contact_Телефон
+63. contact_Город
+64. contact_Адрес клиента
+65. contact_Комментарии
+66. contact_LTV
+67. contact_Число сделок
+68. lead_URL страницы
+69. lead_Комментарий к заказу
+70. lead_source
+71. lead_type
+72. lead_clientID
+73. lead_Источник
+74. lead_ПВЗ СДЭК
+75. contact_Код ПВЗ
+76. contact_Адрес ПВЗ
+77. lead_Счет оплачен
+78. contact_Источник трафика
+79. contact_Трекинг
+80. lead_Условный отказ
+81. lead_Объявленная ценность (руб)
+82. lead_Масса (гр)
+83. lead_Линейная высота (см)
+84. lead_Линейная длина (см)
+85. lead_Линейная ширина (см)
+86. lead_Адрес получателя
+87. lead_Адрес подробно
+88. lead_Сумма наложенного платежа (руб)
+89. lead_Трек-номер
+90. lead_Ссылка на бланк отправления
+91. lead_Стоимость доставки
+92. lead_Трек-номер СДЭК
+93. lead_Тариф Доставки
+94. lead_Название товара
+95. lead_Цена товара
+96. lead_Оплата за лид
+97. contact_Email
+98. contact_День рождения
+99. contact_Звонок Директ Callibri
+100. lead_Наименование получателя
+101. lead_ФИО
+102. lead_Длина
+103. lead_Вес (грамм)*
+104. lead_Ширина
+105. lead_Высота
+106. lead_Адрес доставки
+107. lead_Полный адрес
+108. lead_Номер заказа на сайте
+109. lead_Статус заказа на сайте
+110. lead_Почтовый индекс
+111. lead_Метод доставки
+112. lead_Сумма заказа
+113. lead_ID реферала на сайте
+114. contact_id партнёра на сайте
+115. contact_TelegramId_WZ
+116. lead_СМС-уведомления
+117. lead_CHECKBOX
+118. contact_Max User ID
+119. lead_Оплачено клиентом
+120. lead_Индекс отделения отправки
+121. lead_LTV
+122. contact_Source phone
+123. contact_TelegramUsername_WZ
+124. lead_Индекс почтомата
+125. lead_Тип отправления
+126. lead_FORMNAME
+127. lead_TILDASPEC-ELEMID
+128. lead_Объявление
+129. lead_URL объявления
+130. lead_Дата создания накладной СДЭК
+131. lead_Дата приобретения изделия
+132. lead_Скидка
+133. contact_Whatsgroup_WZ
+134. lead_Поиск товаров GoSklad
+135. lead_Список товаров GoSklad
+136. lead_Модель телефона
+137. lead_будущие покупки
+138. lead_Квалификация лида
+139. lead_Дата предполагаемой доставки отправления
+140. lead_Дата возврата посылки на склад
+141. lead_Колесо
+142. contact_Канал Callibri
+143. lead_Нумерация сделки
+144. lead_ROISTAT_REFERRER
+145. lead_Категория и варианты выбора
+146. lead_Ссылка на документ
+147. lead_Выбранные товары
+148. contact_Ссылка на документ
+149. lead_Solo
+150. lead_YBAIP
+151. lead_from
+152. lead_Source phone
+153. lead_Дата создания сделки
+154. lead_Дата перехода в Сборку
+155. lead_ИМ сдэк
+156. lead_Дата перехода Передан в доставку
+157. lead_Комментарий к отправлению
+158. lead_POLICY
+159. lead_LEADQUALIFYCATION
+160. lead_ROISTAT_POS
+161. lead_ROISTAT_FIELDS_ROISTAT
+162. lead_ROISTAT_URL
+163. lead_TEST-TAG
+164. lead_BANNER-SIZES
+165. lead_CTIME
+166. lead_ACTUAL-FORMAT
+167. lead_PCODEVER
+168. lead_BANNER-TEST-TAGS
+169. lead_BANNERS-VIDEOS
+170. lead_CONSTRUCTOR-RENDERED-ASSETS
+171. lead_RENDERED-DIRECT-ASSETS
+172. lead_WIDTH
+173. lead_HEIGHT
+174. lead_STAT-ID
+175. lead_PCODE-ACTIVE-TESTIDS
+176. lead_ORDER-BANNERS-OPTIONS
+177. lead_CLICK-TIME
+178. lead_CLICKX
+179. lead_CLICKY
+180. lead_YPRQEE
+181. lead_CB
+182. lead_RS_STAT
+183. lead_Номер линии билайн:
+184. lead_ETEXT
+185. lead_Ответственный за доставку
+186. lead_AI_abcde
+187. lead_YSCLID
+188. contact_Max ID
+189. lead_POLICY_MARKETING
+190. lead_ASSET-CLICK
+191. lead_URL

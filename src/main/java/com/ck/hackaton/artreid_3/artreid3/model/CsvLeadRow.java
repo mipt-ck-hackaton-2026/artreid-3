@@ -11,6 +11,15 @@ public class CsvLeadRow {
     @CsvBindByName(column = "lead_id")
     private String leadId;
 
+    @CsvBindByName(column = "lead_created_at")
+    private String leadCreatedAt;
+
+    @CsvBindByName(column = "closed_ts")
+    private String closedTs;
+
+    @CsvBindByName(column = "lead_Дата перехода в Сборку")
+    private String leadDateToAssembly;
+
     @CsvBindByName(column = "sale_ts")
     private String saleTs;
 
@@ -40,4 +49,16 @@ public class CsvLeadRow {
 
     @CsvBindByName(column = "contact_Город")
     private String city;
+
+    @CsvBindByName(column = "lead_Квалификация лида")
+    private String leadQualification;
+
+    @CsvBindByName(column = "lead_Ответственный за доставку")
+    private String deliveryManagerId;
+
+    @CsvBindByName(column = "outcome_unknown")
+    private String outcomeUnknown;
+
+    @CsvBindByName(column = "lifecycle_incomplete")
+    private String lifecycleIncomplete;
 }

@@ -38,4 +38,16 @@ public class Lead {
 
     @Column(name = "city")
     private String city;
+
+    @Column(name = "delivery_manager_id")
+    private String deliveryManagerId;
+
+    @Column(name = "lead_qualification")
+    private String leadQualification;
+
+    @Column(name = "outcome_unknown")
+    private Boolean outcomeUnknown;
+
+    @Column(name = "lifecycle_incomplete")
+    private Boolean lifecycleIncomplete;
 }
