@@ -18,10 +18,13 @@ public class LeadEventBatchRepository {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String UPSERT_SQL = """
-            INSERT INTO lead_events (lead_id, stage_name, event_time)
-            VALUES (?, ?, ?)
-            ON CONFLICT (lead_id, stage_name) DO UPDATE SET
-                event_time = EXCLUDED.event_time
+            MERGE INTO lead_events t
+            USING (VALUES (?, ?, ?)) s (lead_id, stage_name, event_time)
+            ON (t.lead_id = s.lead_id AND t.stage_name = s.stage_name)
+            WHEN MATCHED THEN UPDATE SET
+                event_time = s.event_time
+            WHEN NOT MATCHED THEN INSERT (lead_id, stage_name, event_time)
+            VALUES (s.lead_id, s.stage_name, s.event_time)
             """;
 
     public void batchUpsert(List<LeadEvent> events) {

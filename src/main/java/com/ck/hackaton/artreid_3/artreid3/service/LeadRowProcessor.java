@@ -223,6 +223,9 @@ public class LeadRowProcessor {
     private List<LeadEvent> toLeadEvents(CsvLeadRow row, Lead lead) {
         List<LeadEvent> events = new ArrayList<>();
 
+        addEventIfPresent(events, lead, StageName.CREATED, row.getLeadCreatedAt());
+        addEventIfPresent(events, lead, StageName.CLOSED, row.getClosedTs());
+        addEventIfPresent(events, lead, StageName.TO_ASSEMBLY, row.getLeadDateToAssembly());
         addEventIfPresent(events, lead, StageName.SALE, row.getSaleTs());
         addEventIfPresent(events, lead, StageName.HANDED_TO_DELIVERY, row.getHandedToDeliveryTs());
         addEventIfPresent(events, lead, StageName.ISSUED_OR_PVZ, row.getIssuedOrPvzTs());
