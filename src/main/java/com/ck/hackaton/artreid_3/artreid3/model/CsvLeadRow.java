@@ -11,6 +11,15 @@ public class CsvLeadRow {
     @CsvBindByName(column = "lead_id")
     private String leadId;
 
+    @CsvBindByName(column = "lead_created_at")
+    private String leadCreatedAt;
+
+    @CsvBindByName(column = "closed_ts")
+    private String closedTs;
+
+    @CsvBindByName(column = "lead_Дата перехода в Сборку")
+    private String leadDateToAssembly;
+
     @CsvBindByName(column = "sale_ts")
     private String saleTs;
 

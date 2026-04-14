@@ -18,13 +18,16 @@ public class LeadBatchRepository {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String UPSERT_SQL = """
-            INSERT INTO leads (external_lead_id, manager_id, pipeline_id, delivery_service, city)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT (external_lead_id) DO UPDATE SET
-                manager_id = EXCLUDED.manager_id,
-                pipeline_id = EXCLUDED.pipeline_id,
-                delivery_service = EXCLUDED.delivery_service,
-                city = EXCLUDED.city
+            MERGE INTO leads t
+            USING (VALUES (CAST(? AS VARCHAR), CAST(? AS VARCHAR), CAST(? AS INTEGER), CAST(? AS VARCHAR), CAST(? AS VARCHAR))) s (external_lead_id, manager_id, pipeline_id, delivery_service, city)
+            ON (t.external_lead_id = s.external_lead_id)
+            WHEN MATCHED THEN UPDATE SET
+                manager_id = s.manager_id,
+                pipeline_id = s.pipeline_id,
+                delivery_service = s.delivery_service,
+                city = s.city
+            WHEN NOT MATCHED THEN INSERT (external_lead_id, manager_id, pipeline_id, delivery_service, city)
+            VALUES (s.external_lead_id, s.manager_id, s.pipeline_id, s.delivery_service, s.city)
             """;
 
     public void batchUpsert(List<Lead> leads) {
