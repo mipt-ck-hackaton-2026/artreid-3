@@ -1,4 +1,4 @@
-package com.ck.hackaton.artreid_3.artreid3.model;
+package com.ck.hackaton.artreid_3.artreid3.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataLoadResponse {
+public class DataLoadResponseDTO {
     private int loaded;
     private int updated;
     private int skipped;

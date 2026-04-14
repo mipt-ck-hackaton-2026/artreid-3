@@ -23,6 +23,7 @@ public class SlaConfig {
     private int[] shortMinutesBuckets = {15, 60};
     private int[] daysBuckets = {1, 3};
 
+    private int firstResponseNormativeMinutes = 30;
 
     public int getDeliverySlaThresholdMinutes() {
         return deliveryTotalDays * 24 * 60;

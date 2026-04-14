@@ -1,7 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
+import com.ck.hackaton.artreid_3.artreid3.dto.DataLoadResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.model.CsvLeadRow;
-import com.ck.hackaton.artreid_3.artreid3.model.DataLoadResponse;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ public class DataImportService {
 
     private final LeadRowProcessor leadRowProcessor;
 
-    public DataLoadResponse loadFromCsv(MultipartFile file) {
-        DataLoadResponse response = new DataLoadResponse(0, 0, 0, 0);
+    public DataLoadResponseDTO loadFromCsv(MultipartFile file) {
+        DataLoadResponseDTO response = new DataLoadResponseDTO(0, 0, 0, 0);
 
         try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)) {
             CsvToBean<CsvLeadRow> csvToBean = new CsvToBeanBuilder<CsvLeadRow>(reader)
@@ -48,7 +48,7 @@ public class DataImportService {
         }
     }
 
-    private void processBatch(List<CsvLeadRow> batch, DataLoadResponse response) {
+    private void processBatch(List<CsvLeadRow> batch, DataLoadResponseDTO response) {
         try {
             LeadRowProcessor.BatchResult result = leadRowProcessor.processBatch(batch);
             response.setLoaded(response.getLoaded() + result.loaded());

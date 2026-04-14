@@ -24,19 +24,19 @@ public class Lead {
     @Column(name = "lead_id")
     private Long leadId;
 
-    @Column(name = "external_lead_id", nullable = false, unique = true)
+    @Column(name = "external_lead_id", nullable = false, unique = true, length = 50)
     private String externalLeadId;
 
-    @Column(name = "manager_id")
+    @Column(name = "manager_id", length = 50)
     private String managerId;
 
     @Column(name = "pipeline_id")
     private Integer pipelineId;
 
-    @Column(name = "delivery_service")
+    @Column(name = "delivery_service", length = 100)
     private String deliveryService;
 
-    @Column(name = "city")
+    @Column(name = "city", length = 100)
     private String city;
 
     @Column(name = "delivery_manager_id")

@@ -36,7 +36,7 @@ public class LeadEvent {
     private Lead lead;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "stage_name", nullable = false)
+    @Column(name = "stage_name", nullable = false, length = 50)
     private StageName stageName;
 
     @Column(name = "event_time", nullable = false)

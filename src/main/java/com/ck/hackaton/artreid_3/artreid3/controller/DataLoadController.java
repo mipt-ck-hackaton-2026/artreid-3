@@ -1,6 +1,6 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
-import com.ck.hackaton.artreid_3.artreid3.model.DataLoadResponse;
+import com.ck.hackaton.artreid_3.artreid3.dto.DataLoadResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.service.DataImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +17,7 @@ public class DataLoadController {
 
     @PostMapping(value = "/load", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public DataLoadResponse load(@RequestParam("file") MultipartFile file) {
+    public DataLoadResponseDTO load(@RequestParam("file") MultipartFile file) {
         return dataImportService.loadFromCsv(file);
     }
 }

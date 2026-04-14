@@ -1,7 +1,8 @@
 package com.ck.hackaton.artreid_3.artreid3.repository;
 
-import com.ck.hackaton.artreid_3.artreid3.model.DeliverySummaryResponse;
-import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaResponse.*;
+import com.ck.hackaton.artreid_3.artreid3.dto.DeliverySummaryResponseDTO;
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,23 +16,23 @@ import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
-public class SlaMetricsRepository {
+public class DeliveryMetricsRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final String RAW_DATA_CTE = """
             WITH raw_data AS (
-                SELECT 
+                SELECT
                     l.delivery_manager_id as manager_id,
                     EXTRACT(EPOCH FROM (le_pvz.event_time - le_handed.event_time)) / 60 AS sla4_interval_min,
                     EXTRACT(EPOCH FROM (
-                        COALESCE(LEAST(le_received.event_time, le_rejected.event_time, le_returned.event_time), 
-                                 le_received.event_time, le_rejected.event_time, le_returned.event_time) 
+                        COALESCE(LEAST(le_received.event_time, le_rejected.event_time, le_returned.event_time),
+                                 le_received.event_time, le_rejected.event_time, le_returned.event_time)
                         - le_pvz.event_time
                     )) / 60 AS sla5_interval_min,
                     EXTRACT(EPOCH FROM (
-                        COALESCE(LEAST(le_received.event_time, le_rejected.event_time, le_returned.event_time), 
-                                 le_received.event_time, le_rejected.event_time, le_returned.event_time) 
+                        COALESCE(LEAST(le_received.event_time, le_rejected.event_time, le_returned.event_time),
+                                 le_received.event_time, le_rejected.event_time, le_returned.event_time)
                         - le_handed.event_time
                     )) / 60 AS del_interval_min
                 FROM leads l
@@ -52,43 +53,42 @@ public class SlaMetricsRepository {
             )""";
 
     private static final String METRICS_COLUMNS = """
-                COUNT(sla4_interval_min) as sla4_total,
-                COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min <= :sla4Threshold) as sla4_met,
-                COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold) as sla4_breach,
-                AVG(sla4_interval_min) as sla4_avg,
-                percentile_cont(0.5) WITHIN GROUP (ORDER BY sla4_interval_min) as sla4_median,
-                percentile_cont(0.9) WITHIN GROUP (ORDER BY sla4_interval_min) as sla4_p90,
-                COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold AND sla4_interval_min <= :sla4Threshold + 24*60) as sla4_up_to_1d,
-                COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold + 24*60 AND sla4_interval_min <= :sla4Threshold + 3*24*60) as sla4_1_to_3d,
-                COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold + 3*24*60) as sla4_over_3d,
-        
-                COUNT(sla5_interval_min) as sla5_total,
-                COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min <= :sla5Threshold) as sla5_met,
-                COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold) as sla5_breach,
-                AVG(sla5_interval_min) as sla5_avg,
-                percentile_cont(0.5) WITHIN GROUP (ORDER BY sla5_interval_min) as sla5_median,
-                percentile_cont(0.9) WITHIN GROUP (ORDER BY sla5_interval_min) as sla5_p90,
-                COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold AND sla5_interval_min <= :sla5Threshold + 24*60) as sla5_up_to_1d,
-                COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold + 24*60 AND sla5_interval_min <= :sla5Threshold + 3*24*60) as sla5_1_to_3d,
-                COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold + 3*24*60) as sla5_over_3d,
-        
-                COUNT(del_interval_min) as del_total,
-                COUNT(del_interval_min) FILTER (WHERE del_interval_min <= :delThreshold) as del_met,
-                COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold) as del_breach,
-                AVG(del_interval_min) as del_avg,
-                percentile_cont(0.5) WITHIN GROUP (ORDER BY del_interval_min) as del_median,
-                percentile_cont(0.9) WITHIN GROUP (ORDER BY del_interval_min) as del_p90,
-                COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold AND del_interval_min <= :delThreshold + 24*60) as del_up_to_1d,
-                COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold + 24*60 AND del_interval_min <= :delThreshold + 3*24*60) as del_1_to_3d,
-                COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold + 3*24*60) as del_over_3d
-""";
+                            COUNT(sla4_interval_min) as sla4_total,
+                            COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min <= :sla4Threshold) as sla4_met,
+                            COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold) as sla4_breach,
+                            AVG(sla4_interval_min) as sla4_avg,
+                            percentile_cont(0.5) WITHIN GROUP (ORDER BY sla4_interval_min) as sla4_median,
+                            percentile_cont(0.9) WITHIN GROUP (ORDER BY sla4_interval_min) as sla4_p90,
+                            COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold AND sla4_interval_min <= :sla4Threshold + 24*60) as sla4_up_to_1d,
+                            COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold + 24*60 AND sla4_interval_min <= :sla4Threshold + 3*24*60) as sla4_1_to_3d,
+                            COUNT(sla4_interval_min) FILTER (WHERE sla4_interval_min > :sla4Threshold + 3*24*60) as sla4_over_3d,
 
-    private static final String DELIVERY_SLA_QUERY = 
-            RAW_DATA_CTE + """
-            , metrics AS (
-                SELECT 
-                    manager_id,
-""" + METRICS_COLUMNS + """
+                            COUNT(sla5_interval_min) as sla5_total,
+                            COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min <= :sla5Threshold) as sla5_met,
+                            COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold) as sla5_breach,
+                            AVG(sla5_interval_min) as sla5_avg,
+                            percentile_cont(0.5) WITHIN GROUP (ORDER BY sla5_interval_min) as sla5_median,
+                            percentile_cont(0.9) WITHIN GROUP (ORDER BY sla5_interval_min) as sla5_p90,
+                            COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold AND sla5_interval_min <= :sla5Threshold + 24*60) as sla5_up_to_1d,
+                            COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold + 24*60 AND sla5_interval_min <= :sla5Threshold + 3*24*60) as sla5_1_to_3d,
+                            COUNT(sla5_interval_min) FILTER (WHERE sla5_interval_min > :sla5Threshold + 3*24*60) as sla5_over_3d,
+
+                            COUNT(del_interval_min) as del_total,
+                            COUNT(del_interval_min) FILTER (WHERE del_interval_min <= :delThreshold) as del_met,
+                            COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold) as del_breach,
+                            AVG(del_interval_min) as del_avg,
+                            percentile_cont(0.5) WITHIN GROUP (ORDER BY del_interval_min) as del_median,
+                            percentile_cont(0.9) WITHIN GROUP (ORDER BY del_interval_min) as del_p90,
+                            COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold AND del_interval_min <= :delThreshold + 24*60) as del_up_to_1d,
+                            COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold + 24*60 AND del_interval_min <= :delThreshold + 3*24*60) as del_1_to_3d,
+                            COUNT(del_interval_min) FILTER (WHERE del_interval_min > :delThreshold + 3*24*60) as del_over_3d
+            """;
+
+    private static final String DELIVERY_SLA_QUERY = RAW_DATA_CTE + """
+                        , metrics AS (
+                            SELECT
+                                manager_id,
+            """ + METRICS_COLUMNS + """
                 FROM raw_data
                 GROUP BY manager_id
             )
@@ -100,16 +100,18 @@ public class SlaMetricsRepository {
     }
 
     private static double calculatePercent(long part, long total) {
-        if (total == 0) return 0.0;
+        if (total == 0)
+            return 0.0;
         return BigDecimal.valueOf((double) part / total * 100.0)
                 .setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    private static MetricDetails mapMetricDetails(java.sql.ResultSet rs, String prefix, int threshold) throws java.sql.SQLException {
+    private static MetricDetails mapMetricDetails(java.sql.ResultSet rs, String prefix, int threshold)
+            throws java.sql.SQLException {
         long total = rs.getLong(prefix + "_total");
         long met = rs.getLong(prefix + "_met");
         long breach = rs.getLong(prefix + "_breach");
-        
+
         return MetricDetails.builder()
                 .thresholdMinutes(threshold)
                 .totalOrders(total)
@@ -160,14 +162,13 @@ public class SlaMetricsRepository {
         });
     }
 
-    private static final String DELIVERY_SUMMARY_QUERY = 
-            RAW_DATA_CTE + """
-            SELECT
-""" + METRICS_COLUMNS + """
+    private static final String DELIVERY_SUMMARY_QUERY = RAW_DATA_CTE + """
+                        SELECT
+            """ + METRICS_COLUMNS + """
             FROM raw_data
             """;
 
-    public DeliverySummaryResponse.DeliverySummaryMetrics findDeliverySummary(
+    public DeliverySummaryResponseDTO.DeliverySummaryMetrics findDeliverySummary(
             LocalDateTime dateFrom,
             LocalDateTime dateTo,
             String managerId,
@@ -187,12 +188,11 @@ public class SlaMetricsRepository {
         params.put("sla5Threshold", sla5ThresholdMinutes);
         params.put("delThreshold", delThresholdMinutes);
 
-        return namedParameterJdbcTemplate.queryForObject(DELIVERY_SUMMARY_QUERY, params, (rs, rowNum) ->
-            DeliverySummaryResponse.DeliverySummaryMetrics.builder()
-                    .sla4ToPvz(mapMetricDetails(rs, "sla4", sla4ThresholdMinutes))
-                    .sla5AtPvz(mapMetricDetails(rs, "sla5", sla5ThresholdMinutes))
-                    .deliveryTotal(mapMetricDetails(rs, "del", delThresholdMinutes))
-                    .build()
-        );
+        return namedParameterJdbcTemplate.queryForObject(DELIVERY_SUMMARY_QUERY, params,
+                (rs, rowNum) -> DeliverySummaryResponseDTO.DeliverySummaryMetrics.builder()
+                        .sla4ToPvz(mapMetricDetails(rs, "sla4", sla4ThresholdMinutes))
+                        .sla5AtPvz(mapMetricDetails(rs, "sla5", sla5ThresholdMinutes))
+                        .deliveryTotal(mapMetricDetails(rs, "del", delThresholdMinutes))
+                        .build());
     }
 }
