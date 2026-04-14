@@ -1,6 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
+import com.ck.hackaton.artreid_3.artreid3.model.DeliverySummaryResponse;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaResponse;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaResponse.Period;
 import com.ck.hackaton.artreid_3.artreid3.model.ManagerDeliverySlaResponse.ManagerDeliveryData;
@@ -26,12 +27,8 @@ public class SlaMetricsService {
         int sla5Threshold = slaConfig.getPvzStorageDays() * 24 * 60;
         int delThreshold = slaConfig.getDeliveryTotalDays() * 24 * 60;
 
-        LocalDateTime dateFrom = request.getDateFrom() != null
-                ? request.getDateFrom()
-                : LocalDateTime.now().minusDays(30);
-        LocalDateTime dateTo = request.getDateTo() != null
-                ? request.getDateTo()
-                : LocalDateTime.now();
+        LocalDateTime dateFrom = resolveDateFrom(request);
+        LocalDateTime dateTo = resolveDateTo(request);
 
         List<ManagerDeliveryData> data = slaMetricsRepository.findDeliverySlaByManager(
                 dateFrom,
@@ -52,5 +49,43 @@ public class SlaMetricsService {
                         .build())
                 .data(data)
                 .build();
+    }
+
+    public DeliverySummaryResponse getDeliverySummary(SlaDeliveryRequest request) {
+        int sla4Threshold = slaConfig.getToPvzDays() * 24 * 60;
+        int sla5Threshold = slaConfig.getPvzStorageDays() * 24 * 60;
+        int delThreshold = slaConfig.getDeliveryTotalDays() * 24 * 60;
+
+        LocalDateTime dateFrom = resolveDateFrom(request);
+        LocalDateTime dateTo = resolveDateTo(request);
+
+        DeliverySummaryResponse.DeliverySummaryMetrics metrics =
+                slaMetricsRepository.findDeliverySummary(
+                        dateFrom,
+                        dateTo,
+                        request.getDeliveryManagerId(),
+                        request.getLeadQualification(),
+                        request.getDeliveryService(),
+                        sla4Threshold,
+                        sla5Threshold,
+                        delThreshold
+                );
+
+        return DeliverySummaryResponse.builder()
+                .pipeline("delivery")
+                .period(Period.builder()
+                        .from(dateFrom.toLocalDate().toString())
+                        .to(dateTo.toLocalDate().toString())
+                        .build())
+                .metrics(metrics)
+                .build();
+    }
+
+    private LocalDateTime resolveDateFrom(SlaDeliveryRequest request) {
+        return request.getDateFrom() != null ? request.getDateFrom() : LocalDateTime.now().minusDays(30);
+    }
+
+    private LocalDateTime resolveDateTo(SlaDeliveryRequest request) {
+        return request.getDateTo() != null ? request.getDateTo() : LocalDateTime.now();
     }
 }
