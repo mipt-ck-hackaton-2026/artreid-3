@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.5.0...v1.6.0) (2026-04-14)
+
+
+### Features
+
+* add SLA monitoring with full metrics support ([11226d9](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/11226d99dd1c507493221dd35053484c04b4066d))
+* **sla:** implement B2C first response SLA endpoints ([4b71508](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/4b7150855bb0ef57231486cc45f407346d93320e))
+
 # [1.5.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.4.0...v1.5.0) (2026-04-14)
 
 
