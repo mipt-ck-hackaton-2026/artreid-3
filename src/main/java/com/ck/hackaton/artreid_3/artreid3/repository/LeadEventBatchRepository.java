@@ -19,7 +19,7 @@ public class LeadEventBatchRepository {
 
     private static final String UPSERT_SQL = """
             MERGE INTO lead_events t
-            USING (VALUES (?, ?, ?)) s (lead_id, stage_name, event_time)
+            USING (VALUES (CAST(? AS BIGINT), CAST(? AS VARCHAR), CAST(? AS TIMESTAMP))) s (lead_id, stage_name, event_time)
             ON (t.lead_id = s.lead_id AND t.stage_name = s.stage_name)
             WHEN MATCHED THEN UPDATE SET
                 event_time = s.event_time

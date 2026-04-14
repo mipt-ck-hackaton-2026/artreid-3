@@ -19,7 +19,7 @@ public class LeadBatchRepository {
 
     private static final String UPSERT_SQL = """
             MERGE INTO leads t
-            USING (VALUES (?, ?, ?, ?, ?)) s (external_lead_id, manager_id, pipeline_id, delivery_service, city)
+            USING (VALUES (CAST(? AS VARCHAR), CAST(? AS VARCHAR), CAST(? AS INTEGER), CAST(? AS VARCHAR), CAST(? AS VARCHAR))) s (external_lead_id, manager_id, pipeline_id, delivery_service, city)
             ON (t.external_lead_id = s.external_lead_id)
             WHEN MATCHED THEN UPDATE SET
                 manager_id = s.manager_id,
