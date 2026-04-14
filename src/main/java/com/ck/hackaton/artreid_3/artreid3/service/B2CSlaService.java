@@ -41,16 +41,16 @@ public class B2CSlaService {
             // Получаем события
             List<LeadEvent> events = leadEventRepository.findByLeadIdAndStageNames(
                     lead.getLeadId(),
-                    Arrays.asList("lead_created", "sale")
+                    Arrays.asList(com.ck.hackaton.artreid_3.artreid3.model.StageName.CREATED, com.ck.hackaton.artreid_3.artreid3.model.StageName.SALE)
             );
 
             LocalDateTime createdTime = null;
             LocalDateTime saleTime = null;
 
             for (LeadEvent event : events) {
-                if ("lead_created".equals(event.getStageName())) {
+                if (com.ck.hackaton.artreid_3.artreid3.model.StageName.CREATED.equals(event.getStageName())) {
                     createdTime = event.getEventTime();
-                } else if ("sale".equals(event.getStageName())) {
+                } else if (com.ck.hackaton.artreid_3.artreid3.model.StageName.SALE.equals(event.getStageName())) {
                     saleTime = event.getEventTime();
                 }
             }

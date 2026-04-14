@@ -1,3 +1,9 @@
 databaseChangeLog:
   - include:
       file: db/changelog/changes/001-create-schema.sql
+  - include:
+      file: db/changelog/changes/002-add-unique-external-lead-id.sql
+  - include:
+      file: db/changelog/changes/003-expand-city-length.sql
+  - include:
+      file: db/changelog/changes/004-add-lead-columns.sql

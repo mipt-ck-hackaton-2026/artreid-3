@@ -1,13 +1,22 @@
 package com.ck.hackaton.artreid_3.artreid3.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "leads")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Lead {
 
     @Id
@@ -15,7 +24,7 @@ public class Lead {
     @Column(name = "lead_id")
     private Long leadId;
 
-    @Column(name = "external_lead_id", length = 50)
+    @Column(name = "external_lead_id", nullable = false, unique = true, length = 50)
     private String externalLeadId;
 
     @Column(name = "manager_id", length = 50)
@@ -29,4 +38,16 @@ public class Lead {
 
     @Column(name = "city", length = 100)
     private String city;
+
+    @Column(name = "delivery_manager_id")
+    private String deliveryManagerId;
+
+    @Column(name = "lead_qualification")
+    private String leadQualification;
+
+    @Column(name = "outcome_unknown")
+    private Boolean outcomeUnknown;
+
+    @Column(name = "lifecycle_incomplete")
+    private Boolean lifecycleIncomplete;
 }
