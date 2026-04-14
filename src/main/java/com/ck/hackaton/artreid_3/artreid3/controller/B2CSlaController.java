@@ -1,8 +1,6 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
-import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO;
-import com.ck.hackaton.artreid_3.artreid3.dto.SlaConfigDto;
 import com.ck.hackaton.artreid_3.artreid3.service.B2CSlaService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +13,10 @@ import static org.springframework.format.annotation.DateTimeFormat.ISO;
 @RequestMapping("/api/sla/b2c")
 public class B2CSlaController {
 
-    private final SlaConfig slaConfig;
     private final B2CSlaService b2CSlaService;
 
-    public B2CSlaController(SlaConfig slaConfig, B2CSlaService b2CSlaService) {
-        this.slaConfig = slaConfig;
+    public B2CSlaController(B2CSlaService b2CSlaService) {
         this.b2CSlaService = b2CSlaService;
-    }
-
-    @GetMapping("/config")
-    public SlaConfigDto getConfig() {
-        return new SlaConfigDto(slaConfig.getFirstResponseNormativeMinutes());
     }
 
     @GetMapping("/summary")
