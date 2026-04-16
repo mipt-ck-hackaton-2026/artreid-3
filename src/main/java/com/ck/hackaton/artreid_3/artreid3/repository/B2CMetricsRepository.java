@@ -6,6 +6,8 @@ import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.B2CSummaryMe
 import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.DaysBreachDistribution;
 import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.ShortBreachDistribution;
 
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerB2CSlaResponseDTO.*;
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -87,6 +90,17 @@ public class B2CMetricsRepository {
                         SELECT
             """ + METRICS_COLUMNS + """
             FROM raw_data
+            """;
+
+    private static final String B2C_BY_MANAGER_SLA_QUERY = RAW_DATA_CTE + """
+                        , metrics AS (
+                            SELECT
+                                manager_id,
+            """ + METRICS_COLUMNS + """
+                FROM raw_data
+                GROUP BY manager_id
+            )
+            SELECT * FROM metrics ORDER BY manager_id
             """;
 
     private static double getDouble(BigDecimal value) {
@@ -175,5 +189,38 @@ public class B2CMetricsRepository {
                         .sla3ToDelivery(mapMetricDetailsDays(rs, "sla3", sla3ThresholdMinutes))
                         .b2cTotal(mapMetricDetailsDays(rs, "b2c", b2cThresholdMinutes))
                         .build());
+    }
+
+    public List<ManagerB2CData> findB2CByManager(
+            LocalDateTime dateFrom,
+            LocalDateTime dateTo,
+            String managerId,
+            String qualification,
+            int sla1ThresholdMinutes,
+            int sla2ThresholdMinutes,
+            int sla3ThresholdMinutes,
+            int b2cThresholdMinutes) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("dateFrom", dateFrom);
+        params.put("dateTo", dateTo);
+        params.put("managerId", managerId);
+        params.put("qualification", qualification);
+        params.put("sla1Threshold", sla1ThresholdMinutes);
+        params.put("sla2Threshold", sla2ThresholdMinutes);
+        params.put("sla3Threshold", sla3ThresholdMinutes);
+        params.put("b2cThreshold", b2cThresholdMinutes);
+
+        return namedParameterJdbcTemplate.query(B2C_BY_MANAGER_SLA_QUERY, params, (rs, rowNum) -> {
+            return ManagerB2CData.builder()
+                    .managerId(rs.getString("manager_id"))
+                    .metrics(B2CMetrics.builder()
+                            .sla1Reaction(mapMetricDetailsShort(rs, "sla1", sla1ThresholdMinutes))
+                            .sla2ToAssembly(mapMetricDetailsDays(rs, "sla2", sla2ThresholdMinutes))
+                            .sla3ToDelivery(mapMetricDetailsDays(rs, "sla3", sla3ThresholdMinutes))
+                            .b2cTotal(mapMetricDetailsDays(rs, "b2c", b2cThresholdMinutes))
+                            .build())
+                    .build();
+        });
     }
 }
