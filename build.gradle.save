@@ -63,3 +63,4 @@ springBoot {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+    testRuntimeOnly 'com.h2database:h2'
