@@ -3,6 +3,7 @@ package com.ck.hackaton.artreid_3.artreid3.dto;
 import com.ck.hackaton.artreid_3.artreid3.model.StageName;
 import lombok.Builder;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
