@@ -26,99 +26,98 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(B2CSlaController.class)
 class B2CSlaControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private B2CSlaService b2CSlaService;
+        @MockitoBean
+        private B2CSlaService b2CSlaService;
 
-    @MockitoBean
-    private BuildProperties buildProperties;
+        @MockitoBean
+        private BuildProperties buildProperties;
 
-    @Test
-    void getB2CSummary_returnsSummary() throws Exception {
-        B2CSummaryMetrics metrics = B2CSummaryMetrics.builder()
-                .sla1Reaction(B2CMetricDetails.builder()
-                        .thresholdMinutes(30)
-                        .totalOrders(10)
-                        .metCount(8)
-                        .build())
-                .build();
+        @Test
+        void getB2CSummary_returnsSummary() throws Exception {
+                B2CSummaryMetrics metrics = B2CSummaryMetrics.builder()
+                                .sla1Reaction(B2CMetricDetails.builder()
+                                                .thresholdMinutes(30)
+                                                .totalOrders(10)
+                                                .metCount(8)
+                                                .build())
+                                .build();
 
-        B2CSummaryResponseDTO responseDTO = B2CSummaryResponseDTO.builder()
-                .pipeline("b2c")
-                .period(Period.builder().from("2026-03-01").to("2026-03-31").build())
-                .metrics(metrics)
-                .build();
+                B2CSummaryResponseDTO responseDTO = B2CSummaryResponseDTO.builder()
+                                .pipeline("b2c")
+                                .period(Period.builder().from("2026-03-01").to("2026-03-31").build())
+                                .metrics(metrics)
+                                .build();
 
-        when(b2CSlaService.calculateSummary(any(LocalDate.class), any(LocalDate.class), eq("mgr1"), eq("A")))
-                .thenReturn(responseDTO);
+                when(b2CSlaService.calculateSummary(any(LocalDate.class), any(LocalDate.class), eq("mgr1"), eq("A")))
+                                .thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/sla/b2c/summary")
-                .param("dateFrom", "2026-03-01")
-                .param("dateTo", "2026-03-31")
-                .param("managerId", "mgr1")
-                .param("qualification", "A"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pipeline").value("b2c"))
-                .andExpect(jsonPath("$.period.from").value("2026-03-01"))
-                .andExpect(jsonPath("$.period.to").value("2026-03-31"))
-                .andExpect(jsonPath("$.metrics.sla1_reaction.threshold_minutes").value(30))
-                .andExpect(jsonPath("$.metrics.sla1_reaction.total_orders").value(10));
-    }
+                mockMvc.perform(get("/api/sla/b2c/summary")
+                                .param("dateFrom", "2026-03-01")
+                                .param("dateTo", "2026-03-31")
+                                .param("managerId", "mgr1")
+                                .param("qualification", "A"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.pipeline").value("b2c"))
+                                .andExpect(jsonPath("$.period.from").value("2026-03-01"))
+                                .andExpect(jsonPath("$.period.to").value("2026-03-31"))
+                                .andExpect(jsonPath("$.metrics.sla1_reaction.threshold_minutes").value(30))
+                                .andExpect(jsonPath("$.metrics.sla1_reaction.total_orders").value(10));
+        }
 
-    @Test
-    void getB2CSummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/sla/b2c/summary")
-                .param("dateFrom", "2026-03-31")
-                .param("dateTo", "2026-03-01"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
-    }
+        @Test
+        void getB2CSummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/sla/b2c/summary")
+                                .param("dateFrom", "2026-03-31")
+                                .param("dateTo", "2026-03-01"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+        }
 
-    @Test
-    void getB2CSlaByManager_returnsDataGroupedByManager() throws Exception {
-        ManagerB2CSlaResponseDTO.ManagerB2CData managerData = ManagerB2CSlaResponseDTO.ManagerB2CData.builder()
-                .managerId("mgr1")
-                .metrics(ManagerB2CSlaResponseDTO.B2CMetrics.builder()
-                        .sla1Reaction(B2CMetricDetails.builder()
-                                .thresholdMinutes(30)
-                                .totalOrders(5)
-                                .metCount(4)
-                                .build())
-                        .build())
-                .build();
+        @Test
+        void getB2CSlaByManager_returnsDataGroupedByManager() throws Exception {
+                ManagerB2CSlaResponseDTO.ManagerB2CData managerData = ManagerB2CSlaResponseDTO.ManagerB2CData.builder()
+                                .managerId("mgr1")
+                                .metrics(ManagerB2CSlaResponseDTO.B2CMetrics.builder()
+                                                .sla1Reaction(B2CMetricDetails.builder()
+                                                                .thresholdMinutes(30)
+                                                                .totalOrders(5)
+                                                                .metCount(4)
+                                                                .build())
+                                                .build())
+                                .build();
 
-        ManagerB2CSlaResponseDTO responseDTO = ManagerB2CSlaResponseDTO.builder()
-                .pipeline("b2c")
-                .period(Period.builder().from("2026-03-01").to("2026-03-31").build())
-                .data(List.of(managerData))
-                .build();
+                ManagerB2CSlaResponseDTO responseDTO = ManagerB2CSlaResponseDTO.builder()
+                                .pipeline("b2c")
+                                .period(Period.builder().from("2026-03-01").to("2026-03-31").build())
+                                .data(List.of(managerData))
+                                .build();
 
-        when(b2CSlaService.getB2CSlaByManager(any(LocalDate.class), any(LocalDate.class), eq("mgr1"), eq("A")))
-                .thenReturn(responseDTO);
+                when(b2CSlaService.getB2CSlaByManager(any(LocalDate.class), any(LocalDate.class), eq("mgr1"), eq("A")))
+                                .thenReturn(responseDTO);
 
-        mockMvc.perform(get("/api/sla/b2c/by-manager")
-                .param("dateFrom", "2026-03-01")
-                .param("dateTo", "2026-03-31")
-                .param("managerId", "mgr1")
-                .param("qualification", "A"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pipeline").value("b2c"))
-                .andExpect(jsonPath("$.period.from").value("2026-03-01"))
-                .andExpect(jsonPath("$.period.to").value("2026-03-31"))
-                .andExpect(jsonPath("$.data[0].manager_id").value("mgr1"))
-                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.threshold_minutes").value(30))
-                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.total_orders").value(5));
-    }
+                mockMvc.perform(get("/api/sla/b2c/by-manager")
+                                .param("dateFrom", "2026-03-01")
+                                .param("dateTo", "2026-03-31")
+                                .param("managerId", "mgr1")
+                                .param("qualification", "A"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.pipeline").value("b2c"))
+                                .andExpect(jsonPath("$.period.from").value("2026-03-01"))
+                                .andExpect(jsonPath("$.period.to").value("2026-03-31"))
+                                .andExpect(jsonPath("$.data[0].manager_id").value("mgr1"))
+                                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.threshold_minutes").value(30))
+                                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.total_orders").value(5));
+        }
 
-    @Test
-    void getB2CSlaByManager_dateFromAfterDateTo_returnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/sla/b2c/by-manager")
-                .param("dateFrom", "2026-03-31")
-                .param("dateTo", "2026-03-01"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
-    }
+        @Test
+        void getB2CSlaByManager_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/sla/b2c/by-manager")
+                                .param("dateFrom", "2026-03-31")
+                                .param("dateTo", "2026-03-01"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+        }
 }
-
