@@ -15,9 +15,9 @@ services:
 
   app:
     image: ghcr.io/mipt-ck-hackaton-2026/artreid-3:latest
-    # build:
-      # context: ..
-      # dockerfile: Dockerfile
+    build:
+      context: ..
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
