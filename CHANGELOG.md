@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.7.0...v1.8.0) (2026-04-18)
+
+
+### Features
+
+* add B2C SLA metrics endpoint grouped by manager ([584c2e1](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/584c2e117b03699ad0a70724f9f2546b68896428))
+* implement B2C SLA by manager endpoint and refactor date range validation logic ([bdfa73b](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/bdfa73b14443363a185b7d8dff3dec957e88e520))
+
 # [1.7.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.6.0...v1.7.0) (2026-04-18)
 
 
