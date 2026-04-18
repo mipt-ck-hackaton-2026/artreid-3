@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.10.0...v1.11.0) (2026-04-18)
+
+
+### Features
+
+* introduce DateResolutionUtil and integrate date validation into SLA services and controllers ([3a32420](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/3a324207febee0d508e6ad7aed66d9df8c660e0f))
+
 # [1.10.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.9.0...v1.10.0) (2026-04-18)
 
 
