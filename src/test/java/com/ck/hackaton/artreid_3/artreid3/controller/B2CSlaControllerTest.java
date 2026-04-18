@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(B2CSlaController.class)
+@WebMvcTest(SlaAnalyticsController.class)
 class B2CSlaControllerTest {
 
     @Autowired
