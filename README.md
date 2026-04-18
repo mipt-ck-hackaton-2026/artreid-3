@@ -132,18 +132,20 @@ curl http://localhost:8080/api/health
 ### Схема базы данных
 
 ```
-┌──────────────────────────┐       ┌──────────────────────────────────┐
-│         leads            │       │         lead_events              │
-├──────────────────────────┤       ├──────────────────────────────────┤
-│ lead_id      BIGSERIAL PK│◄──┐  │ lead_event_id  BIGSERIAL PK     │
-│ external_lead_id VARCHAR  │   │  │ lead_id        BIGINT NOT NULL   │──► FK → leads
-│ manager_id     VARCHAR    │   │  │ stage_name     VARCHAR NOT NULL  │
-│ pipeline_id    INTEGER    │   └──│ event_time     TIMESTAMP NOT NULL│
-│ delivery_service VARCHAR  │      │                                  │
-│ city             VARCHAR  │      │ UQ(lead_id, stage_name)          │
-└──────────────────────────┘       └──────────────────────────────────┘
-                                     IDX: (lead_id, event_time)
-                                     IDX: (stage_name, event_time)
+┌─────────────────────────────────┐       ┌──────────────────────────────────┐
+│             leads               │       │         lead_events              │
+├─────────────────────────────────┤       ├──────────────────────────────────┤
+│ lead_id           BIGSERIAL PK  │◄──┐  │ lead_event_id  BIGSERIAL PK     │
+│ external_lead_id  VARCHAR (UQ)  │   │  │ lead_id        BIGINT NOT NULL   │──► FK → leads
+│ manager_id        VARCHAR       │   │  │ stage_name     VARCHAR NOT NULL  │
+│ pipeline_id       INTEGER       │   └──│ event_time     TIMESTAMP NOT NULL│
+│ delivery_service  VARCHAR       │      │                                  │
+│ city              VARCHAR       │      │ UQ(lead_id, stage_name)          │
+│ delivery_manager_id VARCHAR     │      └──────────────────────────────────┘
+│ lead_qualification  VARCHAR     │        IDX: (lead_id, event_time)
+│ outcome_unknown     BOOLEAN     │        IDX: (stage_name, event_time)
+│ lifecycle_incomplete BOOLEAN    │
+└─────────────────────────────────┘
 ```
 
 ---
@@ -172,13 +174,14 @@ artreid-3/
 │   │   │   ├── model/                         # JPA-сущности и DTO
 │   │   │   └── config/                        # Конфигурации (напр. SlaConfig)
 │   │   └── resources/
-│   │       ├── application.properties         # Конфигурация приложения
+│   │       ├── application.properties         # Базовая конфигурация приложения
+│   │       ├── sla-config.yml                 # Динамические настройки SLA
 │   │       ├── db/changelog/
 │   │       │   ├── db.changelog-master.yaml   # Мастер-файл Liquibase
 │   │       │   └── changes/
-│   │       │       └── 001-create-schema.sql  # Начальная миграция БД
+│   │       │       └── 001-create-schema.sql  # Миграции БД
 │   │       ├── static/                        # Статические файлы
-│   │       └── templates/                     # Шаблоны (Thymeleaf и т.д.)
+│   │       └── templates/                     # Шаблоны
 │   └── test/
 │       └── java/com/ck/hackaton/artreid_3/artreid3/
 │           ├── Artreid3ApplicationTests.java          # Smoke-тест контекста
@@ -250,13 +253,30 @@ spring.servlet.multipart.max-request-size=50MB
 | `SPRING_DATASOURCE_PASSWORD`     | Пароль пользователя БД       | `artreid3`                                  |
 | `SPRING_JPA_HIBERNATE_DDL_AUTO`  | Стратегия DDL (prod: validate)| `validate`                                 |
 
-### Настройки логов и SLA
+### Динамическая настройка SLA (sla-config.yml)
 
-Метрики SLA (ожидания по времени на каждом этапе воронки продаж) заданы по умолчанию в `SlaConfig.java`. В `application.properties` можно переопределить их с префиксом `sla.*`:
+В проекте реализована гибкая настройка SLA через внешний YAML-файл `src/main/resources/sla-config.yml`. Это позволяет менять пороги SLA и корзины нарушений без пересборки приложения.
 
-- `sla.reaction-minutes=30` (Ожидание реакции)
-- `sla.delivery-total-days=14` (Общее время доставки)
-и др.
+| Секция | Параметр | Описание |
+| :--- | :--- | :--- |
+| **b2c** | `reaction_minutes` | SLA-1: Время реакции менеджера |
+| | `to_assembly_hours` | SLA-2: От реакции до сборки |
+| | `assembly_to_delivery_days` | SLA-3: От сборки до передачи в доставку |
+| **delivery** | `to_pvz_days` | SLA-4: Доставка до ПВЗ |
+| | `pvz_storage_days` | SLA-5: Хранение на ПВЗ |
+| **breach_buckets** | `short_minutes` | Границы для минутных SLA (напр. [15, 60]) |
+| | `days` | Границы для дневных SLA (напр. [1, 3]) |
+
+### 🚀 Hot-reload конфига
+
+Приложение автоматически отслеживает изменения в файле конфигурации каждые **5 секунд**. 
+
+**Приоритет поиска файла:**
+1. Файл `sla-config.yml` в корневой папке запущенного приложения (внешний конфиг).
+2. `src/main/resources/sla-config.yml` (внутренний конфиг по умолчанию).
+
+> [!TIP]
+> Чтобы изменить настройки "на лету" в Docker или на сервере, просто положите файл `sla-config.yml` рядом с JAR-архивом или в корень проекта. Перезапуск не требуется!
 
 ---
 
