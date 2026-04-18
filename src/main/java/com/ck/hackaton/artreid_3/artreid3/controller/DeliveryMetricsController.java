@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+import com.ck.hackaton.artreid_3.artreid3.util.DateValidationUtil;
 @RestController
 @RequestMapping("/api/sla/delivery")
 @RequiredArgsConstructor
@@ -25,6 +26,8 @@ public class DeliveryMetricsController {
             @RequestParam(required = false) String managerId,
             @RequestParam(required = false) String qualification,
             @RequestParam(required = false) String deliveryService) {
+
+        DateValidationUtil.validateDateRange(dateFrom, dateTo);
 
         SlaDeliveryRequestDTO request = SlaDeliveryRequestDTO.builder()
                 .dateFrom(dateFrom)
@@ -44,6 +47,8 @@ public class DeliveryMetricsController {
             @RequestParam(required = false) String managerId,
             @RequestParam(required = false) String qualification,
             @RequestParam(required = false) String deliveryService) {
+
+        DateValidationUtil.validateDateRange(dateFrom, dateTo);
 
         SlaDeliveryRequestDTO request = SlaDeliveryRequestDTO.builder()
                 .dateFrom(dateFrom)
