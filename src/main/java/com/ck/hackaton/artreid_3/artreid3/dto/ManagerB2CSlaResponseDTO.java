@@ -18,9 +18,9 @@ public record ManagerB2CSlaResponseDTO(
 
     @Builder
     public record B2CMetrics(
-            @JsonProperty("sla1_reaction") B2CSummaryResponseDTO.B2CMetricDetails  sla1Reaction,
+            @JsonProperty("sla1_reaction") B2CSummaryResponseDTO.B2CMetricDetails sla1Reaction,
             @JsonProperty("sla2_to_assembly") B2CSummaryResponseDTO.B2CMetricDetails sla2ToAssembly,
-            @JsonProperty("sla3_to_delivery") B2CSummaryResponseDTO.B2CMetricDetails  sla3ToDelivery,
-            @JsonProperty("b2c_total") B2CSummaryResponseDTO.B2CMetricDetails  b2cTotal) {
+            @JsonProperty("sla3_to_delivery") B2CSummaryResponseDTO.B2CMetricDetails sla3ToDelivery,
+            @JsonProperty("b2c_total") B2CSummaryResponseDTO.B2CMetricDetails b2cTotal) {
     }
 }
