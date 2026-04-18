@@ -34,9 +34,11 @@ class SlaMetricsServiceTest {
         @Test
         void shouldUseDefaultDateRange_whenDatesNotProvided() {
                 SlaDeliveryRequestDTO request = SlaDeliveryRequestDTO.builder().build();
-                when(slaConfig.getToPvzDays()).thenReturn(5);
-                when(slaConfig.getPvzStorageDays()).thenReturn(7);
-                when(slaConfig.getDeliveryTotalDays()).thenReturn(14);
+                SlaConfig.Delivery delivery = mock(SlaConfig.Delivery.class);
+                when(slaConfig.getDelivery()).thenReturn(delivery);
+                when(delivery.getToPvzDays()).thenReturn(5);
+                when(delivery.getPvzStorageDays()).thenReturn(7);
+                when(delivery.getTotalDays()).thenReturn(14);
                 when(slaMetricsRepository.findDeliverySlaByManager(any(), any(), isNull(), isNull(), isNull(), anyInt(),
                                 anyInt(), anyInt()))
                                 .thenReturn(List.of());
@@ -66,9 +68,11 @@ class SlaMetricsServiceTest {
         @Test
         void shouldCallRepository_forSummary() {
                 SlaDeliveryRequestDTO request = SlaDeliveryRequestDTO.builder().build();
-                when(slaConfig.getToPvzDays()).thenReturn(5);
-                when(slaConfig.getPvzStorageDays()).thenReturn(7);
-                when(slaConfig.getDeliveryTotalDays()).thenReturn(14);
+                SlaConfig.Delivery delivery = mock(SlaConfig.Delivery.class);
+                when(slaConfig.getDelivery()).thenReturn(delivery);
+                when(delivery.getToPvzDays()).thenReturn(5);
+                when(delivery.getPvzStorageDays()).thenReturn(7);
+                when(delivery.getTotalDays()).thenReturn(14);
 
                 DeliverySummaryResponseDTO.DeliverySummaryMetrics metrics = DeliverySummaryResponseDTO.DeliverySummaryMetrics
                                 .builder().build();

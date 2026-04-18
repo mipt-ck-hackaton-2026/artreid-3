@@ -23,9 +23,9 @@ public class DeliveryMetricsService {
         private final SlaConfig slaConfig;
 
         public ManagerDeliverySlaResponseDTO getDeliverySlaByManager(SlaDeliveryRequestDTO request) {
-                int sla4Threshold = slaConfig.getToPvzDays() * 24 * 60;
-                int sla5Threshold = slaConfig.getPvzStorageDays() * 24 * 60;
-                int delThreshold = slaConfig.getDeliveryTotalDays() * 24 * 60;
+                int sla4Threshold = slaConfig.getDelivery().getToPvzDays() * 24 * 60;
+                int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
+                int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
 
                 LocalDateTime dateFrom = resolveDateFrom(request);
                 LocalDateTime dateTo = resolveDateTo(request);
@@ -51,9 +51,9 @@ public class DeliveryMetricsService {
         }
 
         public DeliverySummaryResponseDTO getDeliverySummary(SlaDeliveryRequestDTO request) {
-                int sla4Threshold = slaConfig.getToPvzDays() * 24 * 60;
-                int sla5Threshold = slaConfig.getPvzStorageDays() * 24 * 60;
-                int delThreshold = slaConfig.getDeliveryTotalDays() * 24 * 60;
+                int sla4Threshold = slaConfig.getDelivery().getToPvzDays() * 24 * 60;
+                int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
+                int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
 
                 LocalDateTime dateFrom = resolveDateFrom(request);
                 LocalDateTime dateTo = resolveDateTo(request);

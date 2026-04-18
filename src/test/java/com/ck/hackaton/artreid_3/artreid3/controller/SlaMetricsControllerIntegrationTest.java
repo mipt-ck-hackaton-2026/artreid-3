@@ -3,7 +3,7 @@ package com.ck.hackaton.artreid_3.artreid3.controller;
 import com.ck.hackaton.artreid_3.artreid3.dto.DeliverySummaryResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.DeliverySummaryResponseDTO.DeliverySummaryMetrics;
-import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.BreachDistribution;
+import com.ck.hackaton.artreid_3.artreid3.dto.BreachDistributionDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.DeliveryMetrics;
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.ManagerDeliveryData;
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.MetricDetails;
@@ -52,9 +52,7 @@ class SlaMetricsControllerIntegrationTest {
                                                                 .avgMinutes(185.50)
                                                                 .medianMinutes(172.00)
                                                                 .p90Minutes(310.20)
-                                                                .breachDistribution(BreachDistribution.builder()
-                                                                                .upTo1Day(2).oneTo3Days(1).over3Days(1)
-                                                                                .build())
+                                                                .breachDistribution(BreachDistributionDTO.builder().build())
                                                                 .build())
                                                 .build())
                                 .build();
@@ -91,8 +89,7 @@ class SlaMetricsControllerIntegrationTest {
                                                 .avgMinutes(180.0)
                                                 .medianMinutes(170.0)
                                                 .p90Minutes(300.0)
-                                                .breachDistribution(BreachDistribution.builder()
-                                                                .upTo1Day(5).oneTo3Days(3).over3Days(2).build())
+                                                .breachDistribution(BreachDistributionDTO.builder().build())
                                                 .build())
                                 .build();
 

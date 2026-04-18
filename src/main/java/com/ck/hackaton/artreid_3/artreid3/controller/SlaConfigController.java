@@ -18,6 +18,6 @@ public class SlaConfigController {
 
     @GetMapping("/config")
     public SlaConfigDto getConfig() {
-        return new SlaConfigDto(slaConfig.getFirstResponseNormativeMinutes());
+        return new SlaConfigDto(slaConfig.getB2c().getReactionMinutes());
     }
 }

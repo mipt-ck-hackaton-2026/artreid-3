@@ -25,10 +25,10 @@ public class B2CSlaService {
 
     private B2CThresholds resolveThresholds() {
         return new B2CThresholds(
-                slaConfig.getReactionMinutes(),
-                slaConfig.getToAssemblyHours() * 60,
-                slaConfig.getAssemblyToDeliveryDays() * 24 * 60,
-                slaConfig.getB2cTotalDays() * 24 * 60
+                slaConfig.getB2c().getReactionMinutes(),
+                slaConfig.getB2c().getToAssemblyHours() * 60,
+                slaConfig.getB2c().getAssemblyToDeliveryDays() * 24 * 60,
+                slaConfig.getB2c().getTotalDays() * 24 * 60
         );
     }
 

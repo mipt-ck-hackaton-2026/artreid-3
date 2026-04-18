@@ -28,20 +28,7 @@ public record B2CSummaryResponseDTO(
             @JsonProperty("avg_minutes") double avgMinutes,
             @JsonProperty("median_minutes") double medianMinutes,
             @JsonProperty("p90_minutes") double p90Minutes,
-            @JsonProperty("breach_distribution") Object breachDistribution) {
+            @JsonProperty("breach_distribution") BreachDistributionDTO breachDistribution) {
     }
 
-    @Builder
-    public record ShortBreachDistribution(
-            @JsonProperty("up_to_15min") long upTo15Min,
-            @JsonProperty("15_to_60min") long fifteenTo60Min,
-            @JsonProperty("over_60min") long over60Min) {
-    }
-
-    @Builder
-    public record DaysBreachDistribution(
-            @JsonProperty("up_to_1day") long upTo1Day,
-            @JsonProperty("1_to_3days") long oneTo3Days,
-            @JsonProperty("over_3days") long over3Days) {
-    }
 }

@@ -86,13 +86,13 @@ public class OrderTimelineService {
 
     private boolean isSlaViolated(StageName from, StageName to, long actualMinutes) {
         if (from == StageName.CREATED && to == StageName.SALE)
-            return actualMinutes > slaConfig.getReactionMinutes();
+            return actualMinutes > slaConfig.getB2c().getReactionMinutes();
 
         if (from == StageName.SALE && to == StageName.TO_ASSEMBLY)
-            return actualMinutes > (slaConfig.getToAssemblyHours() * 60);
+            return actualMinutes > (slaConfig.getB2c().getToAssemblyHours() * 60);
 
         if (from == StageName.TO_ASSEMBLY && to == StageName.HANDED_TO_DELIVERY)
-            return actualMinutes > (slaConfig.getAssemblyToDeliveryDays() * 1440);
+            return actualMinutes > (slaConfig.getB2c().getAssemblyToDeliveryDays() * 1440);
 
         if (from == StageName.HANDED_TO_DELIVERY && to == StageName.ISSUED_OR_PVZ)
             return actualMinutes > (deliveryProps.getHandedToPvzDays() * 1440);
