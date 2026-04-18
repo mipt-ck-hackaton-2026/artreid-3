@@ -11,7 +11,6 @@ public class MetricsHelper {
 
     public static String buildBucketColumns(String prefix, String thresholdParam, int[] bounds, int multiplier) {
         StringBuilder sb = new StringBuilder();
-        int prev = 0;
         for (int i = 0; i < bounds.length; i++) {
             int current = bounds[i] * multiplier;
             if (i == 0) {

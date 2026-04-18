@@ -33,6 +33,6 @@ class SlaConfigControllerTest {
 
         mockMvc.perform(get("/api/sla/config"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstResponseNormativeMinutes").value(45));
+                .andExpect(jsonPath("$.b2c.reactionMinutes").value(45));
     }
 }

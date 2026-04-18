@@ -2,7 +2,6 @@ package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.dto.DeliverySummaryResponseDTO;
-import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.SlaDeliveryRequestDTO;
 import com.ck.hackaton.artreid_3.artreid3.repository.DeliveryMetricsRepository;
 import org.junit.jupiter.api.Test;
