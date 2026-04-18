@@ -118,7 +118,7 @@ class B2CSlaControllerTest {
                 .param("dateFrom", "2026-03-31")
                 .param("dateTo", "2026-03-01"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("dateFrom must be <= dateTo"));
+                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
     }
 }
 
