@@ -1,6 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
+import com.ck.hackaton.artreid_3.artreid3.dto.SlaConfigDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ public class SlaConfigController {
     }
 
     @GetMapping("/config")
-    public SlaConfig getConfig() {
-        return slaConfig;
+    public SlaConfigDTO getConfig() {
+        return SlaConfigDTO.from(slaConfig);
     }
 }

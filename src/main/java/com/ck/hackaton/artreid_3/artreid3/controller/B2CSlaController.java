@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO;
+import com.ck.hackaton.artreid_3.artreid3.util.DateValidationUtil;
 
 @RestController
 @RequestMapping("/api/sla/b2c")
@@ -41,9 +42,7 @@ public class B2CSlaController {
     private LocalDate[] resolveDateRange(LocalDate dateFrom, LocalDate dateTo) {
         LocalDate from = dateFrom != null ? dateFrom : LocalDate.now().minusDays(30);
         LocalDate to = dateTo != null ? dateTo : LocalDate.now();
-        if (from.isAfter(to)) {
-            throw new IllegalArgumentException("dateFrom must be <= dateTo");
-        }
+        DateValidationUtil.validateDateRange(from, to);
         return new LocalDate[]{from, to};
     }
 }

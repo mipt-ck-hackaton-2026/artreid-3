@@ -117,4 +117,22 @@ class SlaMetricsControllerIntegrationTest {
                                 .param("dateFrom", "invalid-date"))
                                 .andExpect(status().isBadRequest());
         }
+
+        @Test
+        void getDeliverySlaByManager_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/sla/delivery/by-manager")
+                                .param("dateFrom", "2026-03-31T00:00:00")
+                                .param("dateTo", "2026-03-01T00:00:00"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+        }
+
+        @Test
+        void getDeliverySummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+                mockMvc.perform(get("/api/sla/delivery/summary")
+                                .param("dateFrom", "2026-03-31T00:00:00")
+                                .param("dateTo", "2026-03-01T00:00:00"))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+        }
 }
