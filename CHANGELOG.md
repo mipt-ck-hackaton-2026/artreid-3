@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.6.0...v1.7.0) (2026-04-18)
+
+
+### Features
+
+* **order:** correct display of stages in the order timeline ([5ce1936](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/5ce19362665534a95d09526f31e4e7142e02a521))
+* **order:** implement order timeline functionality ([05565e9](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/05565e9e2455c842b957568c135d7bc311d0c3f0))
+
 # [1.6.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.5.0...v1.6.0) (2026-04-14)
 
 
