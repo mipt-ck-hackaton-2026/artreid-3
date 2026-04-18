@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.9.0...v1.10.0) (2026-04-18)
+
+
+### Bug Fixes
+
+* return SlaConfigDTO instead of raw @Configuration proxy from /api/sla/config ([679bba1](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/679bba1786bd57d2323a651b02984c4761a0cd37))
+
+
+### Features
+
+* implement DateValidationUtil and enforce date range validation across SLA controllers ([dbd8635](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/dbd8635f451ef1fadbbc7074ee61441d1ee25cb2))
+
 # [1.9.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.8.0...v1.9.0) (2026-04-18)
 
 
