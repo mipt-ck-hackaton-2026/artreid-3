@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.ck.hackaton.artreid_3.artreid3.util.DateResolutionUtil;
 import java.util.List;
 
 @Service
@@ -27,8 +28,9 @@ public class DeliveryMetricsService {
                 int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
                 int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
 
-                LocalDateTime dateFrom = resolveDateFrom(request);
-                LocalDateTime dateTo = resolveDateTo(request);
+                LocalDateTime[] range = DateResolutionUtil.resolveDateRange(request.getDateFrom(), request.getDateTo());
+                LocalDateTime dateFrom = range[0];
+                LocalDateTime dateTo = range[1];
 
                 List<ManagerDeliveryData> data = slaMetricsRepository.findDeliverySlaByManager(
                                 dateFrom,
@@ -55,8 +57,9 @@ public class DeliveryMetricsService {
                 int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
                 int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
 
-                LocalDateTime dateFrom = resolveDateFrom(request);
-                LocalDateTime dateTo = resolveDateTo(request);
+                LocalDateTime[] range = DateResolutionUtil.resolveDateRange(request.getDateFrom(), request.getDateTo());
+                LocalDateTime dateFrom = range[0];
+                LocalDateTime dateTo = range[1];
 
                 DeliverySummaryResponseDTO.DeliverySummaryMetrics metrics = slaMetricsRepository.findDeliverySummary(
                                 dateFrom,
@@ -78,11 +81,4 @@ public class DeliveryMetricsService {
                                 .build();
         }
 
-        private LocalDateTime resolveDateFrom(SlaDeliveryRequestDTO request) {
-                return request.getDateFrom() != null ? request.getDateFrom() : LocalDateTime.now().minusDays(30);
-        }
-
-        private LocalDateTime resolveDateTo(SlaDeliveryRequestDTO request) {
-                return request.getDateTo() != null ? request.getDateTo() : LocalDateTime.now();
-        }
 }
