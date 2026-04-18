@@ -1,7 +1,7 @@
 package com.ck.hackaton.artreid_3.artreid3.service;
 
 import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
-import com.ck.hackaton.artreid_3.artreid3.config.SlaDeliveryProperties;
+
 import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineStepDTO;
 import com.ck.hackaton.artreid_3.artreid3.model.LeadEvent;
@@ -23,7 +23,7 @@ public class OrderTimelineService {
     private final LeadEventRepository eventRepository;
     private final LeadRepository leadRepository;
     private final SlaConfig slaConfig;
-    private final SlaDeliveryProperties deliveryProps;
+
 
     public OrderTimelineResponseDTO getTimelineResponse(Long leadId) {
         leadRepository.findById(leadId)
@@ -86,19 +86,19 @@ public class OrderTimelineService {
 
     private boolean isSlaViolated(StageName from, StageName to, long actualMinutes) {
         if (from == StageName.CREATED && to == StageName.SALE)
-            return actualMinutes > slaConfig.getReactionMinutes();
+            return actualMinutes > slaConfig.getB2c().getReactionMinutes();
 
         if (from == StageName.SALE && to == StageName.TO_ASSEMBLY)
-            return actualMinutes > (slaConfig.getToAssemblyHours() * 60);
+            return actualMinutes > (slaConfig.getB2c().getToAssemblyHours() * 60);
 
         if (from == StageName.TO_ASSEMBLY && to == StageName.HANDED_TO_DELIVERY)
-            return actualMinutes > (slaConfig.getAssemblyToDeliveryDays() * 1440);
+            return actualMinutes > (slaConfig.getB2c().getAssemblyToDeliveryDays() * 1440);
 
         if (from == StageName.HANDED_TO_DELIVERY && to == StageName.ISSUED_OR_PVZ)
-            return actualMinutes > (deliveryProps.getHandedToPvzDays() * 1440);
+            return actualMinutes > (slaConfig.getDelivery().getToPvzDays() * 1440);
 
         if (from == StageName.ISSUED_OR_PVZ && to == StageName.RECEIVED)
-            return actualMinutes > (deliveryProps.getPvzToReceivedDays() * 1440);
+            return actualMinutes > (slaConfig.getDelivery().getPvzStorageDays() * 1440);
 
         return false;
     }

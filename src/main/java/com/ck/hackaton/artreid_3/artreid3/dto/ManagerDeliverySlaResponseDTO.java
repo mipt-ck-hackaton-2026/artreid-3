@@ -40,13 +40,7 @@ public record ManagerDeliverySlaResponseDTO(
                         @JsonProperty("avg_minutes") double avgMinutes,
                         @JsonProperty("median_minutes") double medianMinutes,
                         @JsonProperty("p90_minutes") double p90Minutes,
-                        @JsonProperty("breach_distribution") BreachDistribution breachDistribution) {
+                        @JsonProperty("breach_distribution") BreachDistributionDTO breachDistribution) {
         }
 
-        @Builder
-        public record BreachDistribution(
-                        @JsonProperty("up_to_1day") long upTo1Day,
-                        @JsonProperty("1_to_3days") long oneTo3Days,
-                        @JsonProperty("over_3days") long over3Days) {
-        }
 }

@@ -1,13 +1,10 @@
 package com.ck.hackaton.artreid_3.artreid3.repository;
 
-import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO;
+import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.B2CMetricDetails;
 import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.B2CSummaryMetrics;
-import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.DaysBreachDistribution;
-import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.ShortBreachDistribution;
-
-import com.ck.hackaton.artreid_3.artreid3.dto.ManagerB2CSlaResponseDTO.*;
-import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO;
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerB2CSlaResponseDTO.B2CMetrics;
+import com.ck.hackaton.artreid_3.artreid3.dto.ManagerB2CSlaResponseDTO.ManagerB2CData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -24,6 +21,7 @@ import java.util.Map;
 public class B2CMetricsRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final SlaConfig slaConfig;
 
     private static final String RAW_DATA_CTE = """
             WITH raw_data AS (
@@ -44,78 +42,39 @@ public class B2CMetricsRepository {
                   AND (:qualification::VARCHAR IS NULL OR l.lead_qualification = :qualification::VARCHAR)
             )""";
 
-    private static final String METRICS_COLUMNS = """
-                            COUNT(sla1_interval_min) as sla1_total,
-                            COUNT(sla1_interval_min) FILTER (WHERE sla1_interval_min <= :sla1Threshold) as sla1_met,
-                            COUNT(sla1_interval_min) FILTER (WHERE sla1_interval_min > :sla1Threshold) as sla1_breach,
-                            AVG(sla1_interval_min) as sla1_avg,
-                            percentile_cont(0.5) WITHIN GROUP (ORDER BY sla1_interval_min) as sla1_median,
-                            percentile_cont(0.9) WITHIN GROUP (ORDER BY sla1_interval_min) as sla1_p90,
-                            COUNT(sla1_interval_min) FILTER (WHERE sla1_interval_min > :sla1Threshold AND sla1_interval_min <= :sla1Threshold + 15) as sla1_up_to_15m,
-                            COUNT(sla1_interval_min) FILTER (WHERE sla1_interval_min > :sla1Threshold + 15 AND sla1_interval_min <= :sla1Threshold + 60) as sla1_15_to_60m,
-                            COUNT(sla1_interval_min) FILTER (WHERE sla1_interval_min > :sla1Threshold + 60) as sla1_over_60m,
+    private String getMetricsColumns() {
+        int[] shortBuckets = slaConfig.getBreachBuckets().getShortMinutes();
+        int[] daysBuckets = slaConfig.getBreachBuckets().getDays();
 
-                            COUNT(sla2_interval_min) as sla2_total,
-                            COUNT(sla2_interval_min) FILTER (WHERE sla2_interval_min <= :sla2Threshold) as sla2_met,
-                            COUNT(sla2_interval_min) FILTER (WHERE sla2_interval_min > :sla2Threshold) as sla2_breach,
-                            AVG(sla2_interval_min) as sla2_avg,
-                            percentile_cont(0.5) WITHIN GROUP (ORDER BY sla2_interval_min) as sla2_median,
-                            percentile_cont(0.9) WITHIN GROUP (ORDER BY sla2_interval_min) as sla2_p90,
-                            COUNT(sla2_interval_min) FILTER (WHERE sla2_interval_min > :sla2Threshold AND sla2_interval_min <= :sla2Threshold + 24*60) as sla2_up_to_1d,
-                            COUNT(sla2_interval_min) FILTER (WHERE sla2_interval_min > :sla2Threshold + 24*60 AND sla2_interval_min <= :sla2Threshold + 3*24*60) as sla2_1_to_3d,
-                            COUNT(sla2_interval_min) FILTER (WHERE sla2_interval_min > :sla2Threshold + 3*24*60) as sla2_over_3d,
+        StringBuilder sb = new StringBuilder();
+        sb.append(MetricsHelper.buildBaseColumns("sla1", "sla1Threshold"));
+        sb.append(MetricsHelper.buildBucketColumns("sla1", "sla1Threshold", shortBuckets, 1));
+        sb.append(",\n");
 
-                            COUNT(sla3_interval_min) as sla3_total,
-                            COUNT(sla3_interval_min) FILTER (WHERE sla3_interval_min <= :sla3Threshold) as sla3_met,
-                            COUNT(sla3_interval_min) FILTER (WHERE sla3_interval_min > :sla3Threshold) as sla3_breach,
-                            AVG(sla3_interval_min) as sla3_avg,
-                            percentile_cont(0.5) WITHIN GROUP (ORDER BY sla3_interval_min) as sla3_median,
-                            percentile_cont(0.9) WITHIN GROUP (ORDER BY sla3_interval_min) as sla3_p90,
-                            COUNT(sla3_interval_min) FILTER (WHERE sla3_interval_min > :sla3Threshold AND sla3_interval_min <= :sla3Threshold + 24*60) as sla3_up_to_1d,
-                            COUNT(sla3_interval_min) FILTER (WHERE sla3_interval_min > :sla3Threshold + 24*60 AND sla3_interval_min <= :sla3Threshold + 3*24*60) as sla3_1_to_3d,
-                            COUNT(sla3_interval_min) FILTER (WHERE sla3_interval_min > :sla3Threshold + 3*24*60) as sla3_over_3d,
+        sb.append(MetricsHelper.buildBaseColumns("sla2", "sla2Threshold"));
+        sb.append(MetricsHelper.buildBucketColumns("sla2", "sla2Threshold", daysBuckets, 1440));
+        sb.append(",\n");
 
-                            COUNT(b2c_interval_min) as b2c_total,
-                            COUNT(b2c_interval_min) FILTER (WHERE b2c_interval_min <= :b2cThreshold) as b2c_met,
-                            COUNT(b2c_interval_min) FILTER (WHERE b2c_interval_min > :b2cThreshold) as b2c_breach,
-                            AVG(b2c_interval_min) as b2c_avg,
-                            percentile_cont(0.5) WITHIN GROUP (ORDER BY b2c_interval_min) as b2c_median,
-                            percentile_cont(0.9) WITHIN GROUP (ORDER BY b2c_interval_min) as b2c_p90,
-                            COUNT(b2c_interval_min) FILTER (WHERE b2c_interval_min > :b2cThreshold AND b2c_interval_min <= :b2cThreshold + 24*60) as b2c_up_to_1d,
-                            COUNT(b2c_interval_min) FILTER (WHERE b2c_interval_min > :b2cThreshold + 24*60 AND b2c_interval_min <= :b2cThreshold + 3*24*60) as b2c_1_to_3d,
-                            COUNT(b2c_interval_min) FILTER (WHERE b2c_interval_min > :b2cThreshold + 3*24*60) as b2c_over_3d
-            """;
+        sb.append(MetricsHelper.buildBaseColumns("sla3", "sla3Threshold"));
+        sb.append(MetricsHelper.buildBucketColumns("sla3", "sla3Threshold", daysBuckets, 1440));
+        sb.append(",\n");
 
-    private static final String B2C_SUMMARY_QUERY = RAW_DATA_CTE + """
-                        SELECT
-            """ + METRICS_COLUMNS + """
-            FROM raw_data
-            """;
-
-    private static final String B2C_BY_MANAGER_SLA_QUERY = RAW_DATA_CTE + """
-                        , metrics AS (
-                            SELECT
-                                manager_id,
-            """ + METRICS_COLUMNS + """
-                FROM raw_data
-                GROUP BY manager_id
-            )
-            SELECT * FROM metrics ORDER BY manager_id
-            """;
+        sb.append(MetricsHelper.buildBaseColumns("b2c", "b2cThreshold"));
+        sb.append(MetricsHelper.buildBucketColumns("b2c", "b2cThreshold", daysBuckets, 1440));
+        
+        return sb.toString();
+    }
 
     private static double getDouble(BigDecimal value) {
         return value != null ? value.setScale(2, RoundingMode.HALF_UP).doubleValue() : 0.0;
     }
 
     private static double calculatePercent(long part, long total) {
-        if (total == 0)
-            return 0.0;
-        return BigDecimal.valueOf((double) part / total * 100.0)
-                .setScale(2, RoundingMode.HALF_UP).doubleValue();
+        if (total == 0) return 0.0;
+        return BigDecimal.valueOf((double) part / total * 100.0).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    private static B2CMetricDetails mapMetricDetailsShort(java.sql.ResultSet rs, String prefix, int threshold)
-            throws java.sql.SQLException {
+    private B2CMetricDetails mapMetricDetails(java.sql.ResultSet rs, String prefix, int threshold, int[] bounds, String unit) throws java.sql.SQLException {
         long total = rs.getLong(prefix + "_total");
         long met = rs.getLong(prefix + "_met");
         long breach = rs.getLong(prefix + "_breach");
@@ -130,35 +89,7 @@ public class B2CMetricsRepository {
                 .avgMinutes(getDouble(rs.getBigDecimal(prefix + "_avg")))
                 .medianMinutes(getDouble(rs.getBigDecimal(prefix + "_median")))
                 .p90Minutes(getDouble(rs.getBigDecimal(prefix + "_p90")))
-                .breachDistribution(ShortBreachDistribution.builder()
-                        .upTo15Min(rs.getLong(prefix + "_up_to_15m"))
-                        .fifteenTo60Min(rs.getLong(prefix + "_15_to_60m"))
-                        .over60Min(rs.getLong(prefix + "_over_60m"))
-                        .build())
-                .build();
-    }
-
-    private static B2CMetricDetails mapMetricDetailsDays(java.sql.ResultSet rs, String prefix, int threshold)
-            throws java.sql.SQLException {
-        long total = rs.getLong(prefix + "_total");
-        long met = rs.getLong(prefix + "_met");
-        long breach = rs.getLong(prefix + "_breach");
-
-        return B2CMetricDetails.builder()
-                .thresholdMinutes(threshold)
-                .totalOrders(total)
-                .metCount(met)
-                .metPercent(calculatePercent(met, total))
-                .breachCount(breach)
-                .breachPercent(calculatePercent(breach, total))
-                .avgMinutes(getDouble(rs.getBigDecimal(prefix + "_avg")))
-                .medianMinutes(getDouble(rs.getBigDecimal(prefix + "_median")))
-                .p90Minutes(getDouble(rs.getBigDecimal(prefix + "_p90")))
-                .breachDistribution(DaysBreachDistribution.builder()
-                        .upTo1Day(rs.getLong(prefix + "_up_to_1d"))
-                        .oneTo3Days(rs.getLong(prefix + "_1_to_3d"))
-                        .over3Days(rs.getLong(prefix + "_over_3d"))
-                        .build())
+                .breachDistribution(MetricsHelper.mapBreachDistribution(rs, prefix, bounds, unit))
                 .build();
     }
 
@@ -172,6 +103,8 @@ public class B2CMetricsRepository {
             int sla3ThresholdMinutes,
             int b2cThresholdMinutes) {
 
+        String query = RAW_DATA_CTE + " SELECT " + getMetricsColumns() + " FROM raw_data";
+
         Map<String, Object> params = new HashMap<>();
         params.put("dateFrom", dateFrom);
         params.put("dateTo", dateTo);
@@ -182,12 +115,12 @@ public class B2CMetricsRepository {
         params.put("sla3Threshold", sla3ThresholdMinutes);
         params.put("b2cThreshold", b2cThresholdMinutes);
 
-        return namedParameterJdbcTemplate.queryForObject(B2C_SUMMARY_QUERY, params,
+        return namedParameterJdbcTemplate.queryForObject(query, params,
                 (rs, rowNum) -> B2CSummaryMetrics.builder()
-                        .sla1Reaction(mapMetricDetailsShort(rs, "sla1", sla1ThresholdMinutes))
-                        .sla2ToAssembly(mapMetricDetailsDays(rs, "sla2", sla2ThresholdMinutes))
-                        .sla3ToDelivery(mapMetricDetailsDays(rs, "sla3", sla3ThresholdMinutes))
-                        .b2cTotal(mapMetricDetailsDays(rs, "b2c", b2cThresholdMinutes))
+                        .sla1Reaction(mapMetricDetails(rs, "sla1", sla1ThresholdMinutes, slaConfig.getBreachBuckets().getShortMinutes(), "minute"))
+                        .sla2ToAssembly(mapMetricDetails(rs, "sla2", sla2ThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
+                        .sla3ToDelivery(mapMetricDetails(rs, "sla3", sla3ThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
+                        .b2cTotal(mapMetricDetails(rs, "b2c", b2cThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
                         .build());
     }
 
@@ -201,6 +134,13 @@ public class B2CMetricsRepository {
             int sla3ThresholdMinutes,
             int b2cThresholdMinutes) {
 
+        String query = RAW_DATA_CTE + """
+                        , metrics AS (
+                            SELECT manager_id,
+            """ + getMetricsColumns() + """
+                            FROM raw_data GROUP BY manager_id
+                        ) SELECT * FROM metrics ORDER BY manager_id """;
+
         Map<String, Object> params = new HashMap<>();
         params.put("dateFrom", dateFrom);
         params.put("dateTo", dateTo);
@@ -211,16 +151,14 @@ public class B2CMetricsRepository {
         params.put("sla3Threshold", sla3ThresholdMinutes);
         params.put("b2cThreshold", b2cThresholdMinutes);
 
-        return namedParameterJdbcTemplate.query(B2C_BY_MANAGER_SLA_QUERY, params, (rs, rowNum) -> {
-            return ManagerB2CData.builder()
-                    .managerId(rs.getString("manager_id"))
-                    .metrics(B2CMetrics.builder()
-                            .sla1Reaction(mapMetricDetailsShort(rs, "sla1", sla1ThresholdMinutes))
-                            .sla2ToAssembly(mapMetricDetailsDays(rs, "sla2", sla2ThresholdMinutes))
-                            .sla3ToDelivery(mapMetricDetailsDays(rs, "sla3", sla3ThresholdMinutes))
-                            .b2cTotal(mapMetricDetailsDays(rs, "b2c", b2cThresholdMinutes))
-                            .build())
-                    .build();
-        });
+        return namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> ManagerB2CData.builder()
+                .managerId(rs.getString("manager_id"))
+                .metrics(B2CMetrics.builder()
+                        .sla1Reaction(mapMetricDetails(rs, "sla1", sla1ThresholdMinutes, slaConfig.getBreachBuckets().getShortMinutes(), "minute"))
+                        .sla2ToAssembly(mapMetricDetails(rs, "sla2", sla2ThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
+                        .sla3ToDelivery(mapMetricDetails(rs, "sla3", sla3ThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
+                        .b2cTotal(mapMetricDetails(rs, "b2c", b2cThresholdMinutes, slaConfig.getBreachBuckets().getDays(), "day"))
+                        .build())
+                .build());
     }
 }

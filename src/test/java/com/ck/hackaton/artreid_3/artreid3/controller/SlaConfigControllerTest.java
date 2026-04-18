@@ -27,10 +27,12 @@ class SlaConfigControllerTest {
 
     @Test
     void getConfig_returnsSlaConfig() throws Exception {
-        when(slaConfig.getFirstResponseNormativeMinutes()).thenReturn(45);
+        SlaConfig.B2c b2c = org.mockito.Mockito.mock(SlaConfig.B2c.class);
+        when(slaConfig.getB2c()).thenReturn(b2c);
+        when(b2c.getReactionMinutes()).thenReturn(45);
 
         mockMvc.perform(get("/api/sla/config"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstResponseNormativeMinutes").value(45));
+                .andExpect(jsonPath("$.b2c.reactionMinutes").value(45));
     }
 }
