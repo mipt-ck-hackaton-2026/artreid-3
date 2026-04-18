@@ -1,3 +1,11 @@
+# [1.9.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.8.0...v1.9.0) (2026-04-18)
+
+
+### Features
+
+* enhance global exception handling with structured ErrorResponse and additional exception types ([fa59394](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/fa593941a0ee874eeda8bdac253a6ea7e2e252e7))
+* **exception:** add global exception handler for date parsing errors ([b66269b](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/b66269b4664210bb5a7fb78f0ca463fa3e80c54d))
+
 # [1.8.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.7.0...v1.8.0) (2026-04-18)
 
 
