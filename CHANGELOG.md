@@ -1,3 +1,11 @@
+# [1.14.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.13.0...v1.14.0) (2026-04-19)
+
+
+### Features
+
+* add managerId and qualification filters to SLA full summary endpoint and repository query ([2cfe298](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/2cfe298f4962c8ab6e51b83be11d04a35a156bd7))
+* update SLA full cycle threshold calculation to use minutes instead of days ([a61ae0e](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/a61ae0ecaa3a4ed0998c3a2bf68cb85d0bb5fc9c))
+
 # [1.13.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.12.0...v1.13.0) (2026-04-19)
 
 
