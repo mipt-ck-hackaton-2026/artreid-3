@@ -14,12 +14,10 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/mipt-ck-hackaton-2026/artreid-3:latest
+    image: ghcr.io/mipt-ck-hackaton-2026/artreid-3:1.15.0
     build:
       context: ..
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/artreid
       SPRING_DATASOURCE_USERNAME: artreid
@@ -27,6 +25,36 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     depends_on:
       db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    image: ghcr.io/mipt-ck-hackaton-2026/artreid-3-frontend:latest
+    environment:
+      - VITE_API_URL=/api
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+      frontend:
         condition: service_healthy
 
 volumes:

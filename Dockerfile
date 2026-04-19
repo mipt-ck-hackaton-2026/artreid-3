@@ -6,6 +6,7 @@ RUN gradle clean bootJar -x test --no-daemon
 
 FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/build/libs/*artreid*.jar app.jar
+COPY --from=builder /app/build/libs/artreid3-*.jar app.jar
+RUN chmod +r app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
