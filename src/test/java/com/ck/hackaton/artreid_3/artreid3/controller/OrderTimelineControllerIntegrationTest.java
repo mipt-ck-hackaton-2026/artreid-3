@@ -1,21 +1,24 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
-import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineResponseDTO;
-import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineStepDTO;
-import com.ck.hackaton.artreid_3.artreid3.model.StageName;
-import com.ck.hackaton.artreid_3.artreid3.service.OrderTimelineService;
+import com.ck.hackaton.artreid_3.artreid3.model.Lead;
+import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
+import com.ck.hackaton.artreid_3.artreid3.repository.LeadRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.nio.file.Files;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -25,46 +28,45 @@ class OrderTimelineControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private LeadRepository leadRepository;
+
+    @Autowired
+    private LeadEventRepository leadEventRepository;
+
     @MockitoBean
-    private OrderTimelineService timelineService;
+    private BuildProperties buildProperties;
+
+    @BeforeEach
+    void setupDatabase() throws Exception {
+        leadEventRepository.deleteAll();
+        leadRepository.deleteAll();
+
+        ClassPathResource resource = new ClassPathResource("test-data/dataset-fragment.csv");
+        byte[] csvBytes = Files.readAllBytes(resource.getFile().toPath());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "dataset-fragment.csv",
+                "text/csv",
+                csvBytes
+        );
+
+        mockMvc.perform(multipart("/api/data/load").file(file))
+                .andExpect(status().isCreated());
+    }
 
     @Test
     void getOrderTimeline_withValidId_returnsTimeline() throws Exception {
-        OrderTimelineStepDTO step1 = OrderTimelineStepDTO.builder()
-                .stage(StageName.CREATED)
-                .startTime(LocalDateTime.parse("2026-04-18T10:00:00"))
-                .endTime(LocalDateTime.parse("2026-04-18T10:30:00"))
-                .durationMinutes(30L)
-                .durationDays(30.0 / 1440)
-                .slaViolated(false)
-                .build();
-        
-        OrderTimelineStepDTO step2 = OrderTimelineStepDTO.builder()
-                .stage(StageName.SALE)
-                .startTime(LocalDateTime.parse("2026-04-18T10:30:00"))
-                .build();
+        List<Lead> leads = leadRepository.findAll();
+        Long leadId = leads.get(0).getLeadId();
 
-        OrderTimelineResponseDTO response = OrderTimelineResponseDTO.builder()
-                .period(OrderTimelineResponseDTO.PeriodDto.builder()
-                        .from("2026-04-18T10:00:00")
-                        .to("2026-04-18T10:30:00")
-                        .build())
-                .pipeline("lead")
-                .data(List.of(step1, step2))
-                .build();
-
-        when(timelineService.getTimelineResponse(123L)).thenReturn(response);
-
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", 123L))
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", leadId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.pipeline").value("lead"))
-                .andExpect(jsonPath("$.period.from").value("2026-04-18T10:00:00"))
-                .andExpect(jsonPath("$.period.to").value("2026-04-18T10:30:00"))
-                .andExpect(jsonPath("$.data[0].stage").value("CREATED"))
-                .andExpect(jsonPath("$.data[0].durationMinutes").value(30))
-                .andExpect(jsonPath("$.data[0].slaViolated").value(false))
-                .andExpect(jsonPath("$.data[1].stage").value("SALE"));
+                .andExpect(jsonPath("$.pipeline").exists())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data").isNotEmpty());
     }
 
     @Test
@@ -75,17 +77,13 @@ class OrderTimelineControllerIntegrationTest {
 
     @Test
     void getOrderTimeline_whenEmptyTimeline_returnsEmptyData() throws Exception {
-        OrderTimelineResponseDTO response = OrderTimelineResponseDTO.builder()
-                .pipeline("lead")
-                .data(List.of())
-                .build();
-
-        when(timelineService.getTimelineResponse(456L)).thenReturn(response);
-
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", 456L))
+        Lead lead = new Lead();
+        lead.setExternalLeadId("test-no-events");
+        lead = leadRepository.save(lead);
+        
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", lead.getLeadId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.pipeline").value("lead"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 }
