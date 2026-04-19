@@ -19,7 +19,7 @@ public class SlaService {
     private final SlaMetricsRepository slaMetricsRepository;
     private final SlaConfig slaConfig;
 
-    public FullSummaryResponseDTO getSlaFull(LocalDate dateFrom, LocalDate dateTo) {
+    public FullSummaryResponseDTO getSlaFull(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
         LocalDate[] range = DateResolutionUtil.resolveDateRange(dateFrom, dateTo);
         int fullThreshold = slaConfig.getFullCycleThresholdMinutes();
         LocalDateTime start = DateResolutionUtil.toStartOfDay(range[0]);
@@ -28,6 +28,8 @@ public class SlaService {
         FullSummaryResponseDTO.FullSummaryMetrics metrics = slaMetricsRepository.findFullSummary(
                 start,
                 end,
+                managerId,
+                qualification,
                 fullThreshold);
 
         return FullSummaryResponseDTO.builder()
