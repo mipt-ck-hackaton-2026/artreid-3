@@ -7,7 +7,7 @@ sla:
   delivery:
     to_pvz_days: 5                 # SLA-4: до ПВЗ
     pvz_storage_days: 7            # SLA-5: хранение на ПВЗ
-    total_days: 10                 # DEL-total: полный цикл доставки
+    total_days: 14                 # DEL-total: полный цикл доставки
   full_cycle_days: 16              # FULL: полный цикл сделки
 
   breach_buckets:
