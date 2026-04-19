@@ -13,8 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +53,7 @@ class AutocompleteControllerIntegrationTest {
 
         Lead lead3 = new Lead();
         lead3.setExternalLeadId("LEAD-3");
-        lead3.setManagerId("manager alpha"); // Lowercase to test ILIKE
+        lead3.setManagerId("manager alpha"); // For ILIKE test
         lead3.setLeadQualification("Low");
         lead3.setDeliveryService("Service A");
         lead3.setCity("Moscow");
@@ -72,11 +71,19 @@ class AutocompleteControllerIntegrationTest {
     }
 
     @Test
-    void getManagers_withSpecificQuery_returnsMatching() throws Exception {
-        mockMvc.perform(get("/api/autocomplete/managers").param("query", "Manager B"))
+    void getQualifications_returnsFilteredQualifications() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/qualifications").param("query", "h"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0]").value("Manager Beta"));
+                .andExpect(jsonPath("$[0]").value("High"));
+    }
+
+    @Test
+    void getDeliveryServices_returnsDistinctServices() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/delivery-services").param("query", "Service"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$", containsInAnyOrder("Service A", "Service B")));
     }
 
     @Test
@@ -88,10 +95,34 @@ class AutocompleteControllerIntegrationTest {
     }
 
     @Test
-    void getLeads_returnsLeadIds() throws Exception {
-        mockMvc.perform(get("/api/autocomplete/leads").param("query", "LEAD-"))
+    void getDeliveryManagers_returnsMatching() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/delivery-managers").param("query", "DM-"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$", containsInAnyOrder("LEAD-1", "LEAD-2", "LEAD-3")));
+                .andExpect(jsonPath("$", containsInAnyOrder("DM-1", "DM-2", "DM-3")));
+    }
+
+    @Test
+    void getLeads_returnsLeadIds() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/leads").param("query", "LEAD-1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0]").value("LEAD-1"));
+    }
+
+    @Test
+    void getManagers_withLimit_respectsLimit() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/managers")
+                        .param("query", "manager")
+                        .param("limit", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void getManagers_withEmptyQuery_returnsAllUpToLimit() throws Exception {
+        mockMvc.perform(get("/api/autocomplete/managers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
     }
 }
