@@ -60,13 +60,15 @@ cd artreid-3
 ./gradlew bootRun
 ```
 
-**Вариант Б: Через Docker Compose (Запуск всего стека: БД + Приложение)**
+**Вариант Б: Через Docker Compose (Запуск всего стека: БД + Бекенд + Фронтенд + Nginx)**
+Проект настроен для запуска всей системы одним Docker-стеком. Nginx выступает в роли шлюза, проксируя запросы к фронтенду и API.
 ```bash
 docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
 ```
 
-Приложение запустится на `http://localhost:8080`.
-Frontend будет доступен на `http://localhost:3000`.
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Backend API:** [http://localhost:3000/api](http://localhost:3000/api)
+- **Swagger UI:** [http://localhost:3000/api/swagger-ui](http://localhost:3000/api/swagger-ui)
 
 ### 3. Проверьте что всё работает
 
@@ -435,38 +437,21 @@ docker run -p 8080:8080 \
 
 ### Docker Compose — запуск проекта одной командой
 
-Для автоматического запуска приложения и базы данных используйте единую команду `docker-compose`:
+Для автоматического запуска всей системы (Бекенд, Фронтенд, Nginx и База данных) используйте команду `docker-compose`:
 
 ```bash
-# Запуск полного стека (приложение + БД)
+# Запуск полного стека
 docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
 ```
-*(Поддерживается как `docker-compose`, так и `docker compose`)*
 
-```bash
-# Остановка с удалением volumes
-docker-compose -f dockerfiles_prod/docker-compose.yml down -v
-```
+**Параметры окружения и порты:**
 
-### Spring Boot Docker Compose (dev-режим)
-
-Файл `compose.yaml` в корне содержит только PostgreSQL для локальной разработки. Но благодаря Spring Boot Docker Compose интеграции **отдельно базу поднимать не нужно**. Достаточно запустить приложение через Gradle:
-
-```bash
-# Эта команда автоматически поднимет БД в Docker и запустит приложение
-./gradlew bootRun
-```
-
-**Параметры продакшен-окружения:**
-
-| Параметр                      | Значение                              |
-|-------------------------------|---------------------------------------|
-| App port                      | `8080`                                |
-| DB name                       | `artreid`                             |
-| DB user                       | `artreid`                             |
-| DB password                   | `artreid`                             |
-| Hibernate DDL-auto            | `validate` (только проверка схемы)    |
-| Volume                        | `postgres_data` (данные персистентны) |
+| Сервис | Порт (внешний) | Описание |
+| :--- | :--- | :--- |
+| **Nginx (Proxy)** | `3000` | Единая точка входа для фронтенда и API |
+| **Backend (App)** | `8080` (внутр.) | Доступен извне через `http://localhost:3000/api` |
+| **Frontend** | `3000` (внутр.) | Доступен извне через `http://localhost:3000/` |
+| **PostgreSQL** | `5432` | База данных для хранения лидов |
 
 ---
 
