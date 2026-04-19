@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.15.0...v1.16.0) (2026-04-19)
+
+
+### Features
+
+* increase client_max_body_size to 100M in nginx configuration ([6466201](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/6466201cd18da71375dd7560bb18863a80e7a3a2))
+
 # [1.15.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.14.0...v1.15.0) (2026-04-19)
 
 
