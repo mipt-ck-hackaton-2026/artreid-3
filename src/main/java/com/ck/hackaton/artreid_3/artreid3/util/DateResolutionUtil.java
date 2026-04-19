@@ -22,4 +22,12 @@ public final class DateResolutionUtil {
         DateValidationUtil.validateDateRange(from, to);
         return new LocalDateTime[]{from, to};
     }
+
+    public static LocalDateTime toStartOfDay(LocalDate date) {
+        return date.atStartOfDay();
+    }
+
+    public static LocalDateTime toEndOfDay(LocalDate date) {
+        return date.plusDays(1).atStartOfDay();
+    }
 }

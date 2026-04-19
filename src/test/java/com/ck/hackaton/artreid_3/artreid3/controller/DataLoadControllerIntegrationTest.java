@@ -67,4 +67,10 @@ class DataLoadControllerIntegrationTest {
                 .andExpect(jsonPath("$.skipped").value(1))
                 .andExpect(jsonPath("$.errors").value(0));
     }
+
+    @Test
+    void load_missingFile_returnsBadRequest() throws Exception {
+        mockMvc.perform(multipart("/api/data/load"))
+                .andExpect(status().isBadRequest());
+    }
 }
