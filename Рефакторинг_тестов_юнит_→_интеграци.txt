@@ -1,0 +1,87 @@
+Рефакторинг тестов: юнит → интеграционные
+Цель
+Заменить юнит-тесты (с моками сервисов через @WebMvcTest / @MockitoExtension) на полноценные интеграционные тесты (@SpringBootTest + @AutoConfigureMockMvc), которые проверяют сквозную логику эндпоинтов — от HTTP-запроса до реальных сервисов/репозиториев/БД. Юнит-тесты оставить только для утилитных классов.
+
+Анализ текущих тестов
+Файл	Тип	Действие
+B2CSlaControllerTest	Юнит (@WebMvcTest, моки сервисов)	❌ Удалить, заменить интеграционным
+SlaConfigControllerTest	Юнит (@WebMvcTest, мок SlaConfig)	❌ Удалить, заменить интеграционным
+HealthControllerTest	Юнит (@WebMvcTest, мок BuildProperties)	❌ Удалить, заменить интеграционным
+SlaMetricsServiceTest	Юнит (@MockitoExtension, моки репозитория)	❌ Удалить, заменить интеграционным тестом контроллера
+OrderTimelineControllerIntegrationTest	"Полу-интеграционный" (@SpringBootTest, но мокает сервис)	❌ Удалить, заменить настоящим интеграционным (с реальной БД)
+SlaMetricsControllerIntegrationTest	"Полу-интеграционный" (@SpringBootTest, мокает сервис)	❌ Удалить, заменить настоящим интеграционным
+DataLoadControllerIntegrationTest	✅ Настоящий интеграционный (реальная БД, реальные сервисы)	Оставить как есть
+OrderTimelineServiceIntegrationTest	✅ Настоящий интеграционный (реальная БД)	Оставить как есть
+Artreid3ApplicationTests	Smoke-тест контекста	Оставить как есть
+Proposed Changes
+Юнит-тесты на утилиты
+[NEW] 
+DateValidationUtilTest.java
+Юнит-тесты для DateValidationUtil:
+
+validateDateRange_bothNull_noException
+validateDateRange_dateFromBeforeDateTo_noException
+validateDateRange_dateFromEqualsDateTo_noException
+validateDateRange_dateFromAfterDateTo_throwsIllegalArgument
+Аналогично для LocalDateTime перегрузки
+[NEW] 
+DateResolutionUtilTest.java
+Юнит-тесты для DateResolutionUtil:
+
+resolveDateRange_bothNull_returnsLast30Days
+resolveDateRange_withDates_returnsSameDates
+resolveDateRange_dateFromOnly_returnFromToToday
+Аналогично для LocalDateTime перегрузки
+Интеграционные тесты контроллеров
+Все интеграционные тесты используют @SpringBootTest + @AutoConfigureMockMvc с реальным Spring-контекстом, реальными сервисами и H2-базой. Мокается только BuildProperties (т.к. он генерируется при сборке и недоступен в тестах).
+
+[NEW] 
+HealthControllerIntegrationTest.java
+GET /api/health → 200, проверяем status=UP и наличие поля version
+[NEW] 
+SlaConfigControllerIntegrationTest.java
+GET /api/sla/config → 200, проверяем все дефолтные значения из SlaConfig
+Проверяем отсутствие Spring-internal полей ($$beanFactory, targetSource)
+[MODIFY] 
+SlaMetricsControllerIntegrationTest.java
+Полная перезапись: убрать мок DeliveryMetricsService, использовать реальную БД. Загружать тестовые данные через CSV-файл перед каждым тестом, затем проверять эндпоинты:
+
+GET /api/sla/delivery/by-manager → 200, проверяем структуру JSON
+GET /api/sla/delivery/summary → 200, проверяем структуру JSON
+Валидация дат (dateFrom > dateTo → 400)
+Невалидный формат даты → 400
+[NEW] 
+B2CSlaControllerIntegrationTest.java
+Замена B2CSlaControllerTest. Реальная БД + загрузка тестовых данных:
+
+GET /api/sla/b2c/summary → 200, проверяем структуру
+GET /api/sla/b2c/by-manager → 200, проверяем структуру
+Валидация дат → 400
+GET /api/sla/full/summary → 200, проверяем работу полного цикла
+Удаление старых юнит-тестов
+[DELETE] 
+B2CSlaControllerTest.java
+[DELETE] 
+SlaConfigControllerTest.java
+[DELETE] 
+HealthControllerTest.java
+[DELETE] 
+SlaMetricsServiceTest.java
+IMPORTANT
+
+OrderTimelineControllerIntegrationTest — текущая версия мокает OrderTimelineService. Заменим на настоящий интеграционный тест с загрузкой данных в БД, аналогично OrderTimelineServiceIntegrationTest.
+
+Сохраняемые тесты (без изменений)
+DataLoadControllerIntegrationTest — уже настоящий интеграционный
+OrderTimelineServiceIntegrationTest — уже настоящий интеграционный
+Artreid3ApplicationTests — smoke-тест
+Подход к тестовым данным
+Для интеграционных тестов, работающих через реальные сервисы и репозитории, данные будут загружены через:
+
+Существующий dataset-fragment.csv + эндпоинт /api/data/load (загрузка CSV через MockMvc) — для тестов, которым нужны реальные лиды и события
+Прямое сохранение через JPA-репозитории (LeadRepository, LeadEventRepository) — для тестов, требующих точных данных
+Verification Plan
+Automated Tests
+bash
+./gradlew test
+Все тесты должны пройти зелёными.

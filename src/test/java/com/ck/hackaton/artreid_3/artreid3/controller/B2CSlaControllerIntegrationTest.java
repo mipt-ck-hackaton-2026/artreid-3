@@ -1,6 +1,5 @@
 package com.ck.hackaton.artreid_3.artreid3.controller;
 
-import com.ck.hackaton.artreid_3.artreid3.model.Lead;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.file.Files;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -23,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrderTimelineControllerIntegrationTest {
+class B2CSlaControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,33 +55,53 @@ class OrderTimelineControllerIntegrationTest {
     }
 
     @Test
-    void getOrderTimeline_withValidId_returnsTimeline() throws Exception {
-        List<Lead> leads = leadRepository.findAll();
-        Long leadId = leads.get(0).getLeadId();
-
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", leadId))
+    void getB2CSummary_returnsSummary() throws Exception {
+        mockMvc.perform(get("/api/sla/b2c/summary")
+                        .param("dateFrom", "2025-02-01")
+                        .param("dateTo", "2025-04-01"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.pipeline").exists())
+                .andExpect(jsonPath("$.pipeline").value("b2c"));
+                }
+
+    @Test
+    void getB2CSummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/sla/b2c/summary")
+                        .param("dateFrom", "2026-03-31")
+                        .param("dateTo", "2026-03-01"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+    }
+
+    @Test
+    void getB2CSlaByManager_returnsDataGroupedByManager() throws Exception {
+        mockMvc.perform(get("/api/sla/b2c/by-manager")
+                        .param("dateFrom", "2025-02-01")
+                        .param("dateTo", "2025-04-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pipeline").value("b2c"))
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data[0].manager_id").exists())
+                .andExpect(jsonPath("$.data[0].metrics").exists());
     }
 
     @Test
-    void getOrderTimeline_withInvalidIdFormat_returnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", "abc"))
-                .andExpect(status().isBadRequest());
+    void getB2CSlaByManager_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/sla/b2c/by-manager")
+                        .param("dateFrom", "2026-03-31")
+                        .param("dateTo", "2026-03-01"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
     }
 
     @Test
-    void getOrderTimeline_whenEmptyTimeline_returnsEmptyData() throws Exception {
-        Lead lead = new Lead();
-        lead.setExternalLeadId("test-no-events");
-        lead = leadRepository.save(lead);
-        
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", lead.getLeadId()))
+    void getFullSummary_returnsFullCycleSummary() throws Exception {
+        mockMvc.perform(get("/api/sla/full/summary")
+                        .param("dateFrom", "2025-02-01")
+                        .param("dateTo", "2025-04-01"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.data").isEmpty());
+                .andExpect(jsonPath("$.pipeline").value("full"))
+                .andExpect(jsonPath("$.metrics").exists())
+                .andExpect(jsonPath("$.metrics.full_total").exists());
     }
 }
