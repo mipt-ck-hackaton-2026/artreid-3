@@ -93,4 +93,11 @@ class OrderTimelineControllerIntegrationTest {
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
+    @Test
+    void getOrderTimeline_withNonExistentId_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", 999999L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Lead not found: 999999"));
+    }
 }

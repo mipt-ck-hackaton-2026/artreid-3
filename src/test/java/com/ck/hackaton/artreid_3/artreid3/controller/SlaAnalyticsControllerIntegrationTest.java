@@ -84,6 +84,13 @@ class SlaAnalyticsControllerIntegrationTest {
     }
 
     @Test
+    void getB2CSummary_invalidDateFormat_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/sla/b2c/summary")
+                        .param("dateFrom", "invalid-date"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getB2CSlaByManager_returnsDataGroupedByManager() throws Exception {
         mockMvc.perform(get("/api/sla/b2c/by-manager")
                         .param("dateFrom", "2025-02-01")
@@ -147,6 +154,22 @@ class SlaAnalyticsControllerIntegrationTest {
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].max_bound").isEmpty())
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].count").value(1))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].ratio").value(1.0));
+    }
+
+    @Test
+    void getFullSummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/sla/full/summary")
+                        .param("dateFrom", "2026-03-31")
+                        .param("dateTo", "2026-03-01"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("dateFrom must be <= dateTo"));
+    }
+
+    @Test
+    void getFullSummary_invalidDateFormat_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/sla/full/summary")
+                        .param("dateFrom", "invalid-date"))
+                .andExpect(status().isBadRequest());
     }
 
     // Delivery Sla Tests
