@@ -44,6 +44,7 @@ public class SlaAnalyticsController {
         DateValidationUtil.validateDateRange(dateFrom, dateTo);
         return b2CSlaService.getB2CSlaByManager(dateFrom, dateTo, managerId, qualification);
     }
+
     @GetMapping("/full/summary")
     public FullSummaryResponseDTO getB2CSlaByManager(
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,

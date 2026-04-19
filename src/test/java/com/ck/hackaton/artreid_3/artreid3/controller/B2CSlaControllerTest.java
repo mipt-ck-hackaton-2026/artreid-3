@@ -6,6 +6,7 @@ import com.ck.hackaton.artreid_3.artreid3.dto.B2CSummaryResponseDTO.B2CSummaryMe
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerB2CSlaResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.ManagerDeliverySlaResponseDTO.Period;
 import com.ck.hackaton.artreid_3.artreid3.service.B2CSlaService;
+import com.ck.hackaton.artreid_3.artreid3.service.SlaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -31,6 +32,9 @@ class B2CSlaControllerTest {
 
         @MockitoBean
         private B2CSlaService b2CSlaService;
+
+        @MockitoBean
+        private SlaService slaService;
 
         @MockitoBean
         private BuildProperties buildProperties;
