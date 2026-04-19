@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.17.0...v1.18.0) (2026-04-19)
+
+
+### Features
+
+* configure header forwarding strategy and update nginx proxy headers for host consistency ([3520be2](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/3520be23a2ceda060cb7c512bebff152c35e02f8))
+
 # [1.17.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.16.0...v1.17.0) (2026-04-19)
 
 
