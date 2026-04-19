@@ -70,12 +70,6 @@ docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
 - **Backend API:** [http://localhost:3000/api](http://localhost:3000/api)
 - **Swagger UI:** [http://localhost:3000/api/swagger-ui](http://localhost:3000/api/swagger-ui)
 
-### 3. Проверьте что всё работает
-
-```bash
-curl http://localhost:8080/api/health
-# {"status":"UP","version":"0.0.1-SNAPSHOT"}
-```
 
 ---
 
