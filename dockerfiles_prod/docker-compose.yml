@@ -23,6 +23,8 @@ services:
       SPRING_DATASOURCE_USERNAME: artreid
       SPRING_DATASOURCE_PASSWORD: artreid
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRINGDOC_SWAGGER_UI_PATH: /api/swagger-ui
+      SPRINGDOC_API_DOCS_PATH: /api/api-docs
     depends_on:
       db:
         condition: service_healthy
