@@ -1,3 +1,15 @@
+# [1.12.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.11.0...v1.12.0) (2026-04-19)
+
+
+### Bug Fixes
+
+* add full summary endpoint to SlaAnalyticsController and inject SlaService into B2CSlaControllerTest ([adcf1a7](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/adcf1a749091ccd9b2415c8a8aae1065363081a3))
+
+
+### Features
+
+* add full SLA metrics endpoint ([ccda26d](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/ccda26d4819a5985bd3f9d8118822541a21ac4fe))
+
 # [1.11.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.10.0...v1.11.0) (2026-04-18)
 
 
