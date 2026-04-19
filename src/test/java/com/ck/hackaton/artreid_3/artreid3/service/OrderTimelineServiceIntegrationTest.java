@@ -59,7 +59,7 @@ class OrderTimelineServiceIntegrationTest {
         createEvent(testLead, StageName.ISSUED_OR_PVZ, baseTime.plusDays(4));
         createEvent(testLead, StageName.RECEIVED, baseTime.plusDays(5));
 
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getPipeline()).isEqualTo("lead");
         assertThat(response.getPeriod()).isNotNull();
@@ -89,7 +89,7 @@ class OrderTimelineServiceIntegrationTest {
         createEvent(testLead, StageName.CREATED, baseTime);
         createEvent(testLead, StageName.SALE, baseTime.plusMinutes(45)); // > 30 мин SLA
 
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getData()).hasSize(2);
         OrderTimelineStepDTO step = response.getData().get(0);
@@ -105,7 +105,7 @@ class OrderTimelineServiceIntegrationTest {
         createEvent(testLead, StageName.CREATED, baseTime);
         createEvent(testLead, StageName.SALE, baseTime.plusMinutes(25)); // < 30 мин SLA
 
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getData()).hasSize(2);
         assertThat(response.getData().get(0).isSlaViolated()).isFalse();
@@ -113,7 +113,7 @@ class OrderTimelineServiceIntegrationTest {
 
     @Test
     void getTimelineResponse_shouldReturnEmptyData_whenNoEventsExist() {
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getPipeline()).isEqualTo("lead");
         assertThat(response.getData()).isEmpty();
@@ -122,7 +122,7 @@ class OrderTimelineServiceIntegrationTest {
 
     @Test
     void getTimelineResponse_shouldThrowException_whenLeadNotFound() {
-        Long nonExistentLeadId = 999999L;
+        String nonExistentLeadId = "NON_EXISTENT_LEAD_001";
 
         assertThatThrownBy(() -> orderTimelineService.getTimelineResponse(nonExistentLeadId))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -134,7 +134,7 @@ class OrderTimelineServiceIntegrationTest {
         LocalDateTime eventTime = LocalDateTime.of(2026, 3, 1, 12, 0);
         createEvent(testLead, StageName.CREATED, eventTime);
 
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getData()).hasSize(1);
         OrderTimelineStepDTO step = response.getData().get(0);
@@ -153,7 +153,7 @@ class OrderTimelineServiceIntegrationTest {
         createEvent(testLead, StageName.CREATED, baseTime);
         createEvent(testLead, StageName.TO_ASSEMBLY, baseTime.plusHours(5));
 
-        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getLeadId());
+        OrderTimelineResponseDTO response = orderTimelineService.getTimelineResponse(testLead.getExternalLeadId());
 
         assertThat(response.getData()).hasSize(3);
         assertThat(response.getData().get(0).getStage()).isEqualTo(StageName.CREATED);

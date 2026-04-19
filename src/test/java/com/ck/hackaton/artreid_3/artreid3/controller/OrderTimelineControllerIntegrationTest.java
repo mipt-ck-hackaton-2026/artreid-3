@@ -59,9 +59,9 @@ class OrderTimelineControllerIntegrationTest {
     @Test
     void getOrderTimeline_withValidId_returnsTimeline() throws Exception {
         List<Lead> leads = leadRepository.findAll();
-        Long leadId = leads.get(0).getLeadId();
+        String externalLeadId = leads.get(0).getExternalLeadId();
 
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", leadId))
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", externalLeadId))
                 .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -77,18 +77,12 @@ class OrderTimelineControllerIntegrationTest {
     }
 
     @Test
-    void getOrderTimeline_withInvalidIdFormat_returnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", "abc"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void getOrderTimeline_whenEmptyTimeline_returnsEmptyData() throws Exception {
         Lead lead = new Lead();
         lead.setExternalLeadId("test-no-events");
         lead = leadRepository.save(lead);
         
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", lead.getLeadId()))
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", lead.getExternalLeadId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.data").isEmpty());
@@ -96,8 +90,8 @@ class OrderTimelineControllerIntegrationTest {
 
     @Test
     void getOrderTimeline_withNonExistentId_returnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/orders/{leadId}/timeline", 999999L))
+        mockMvc.perform(get("/api/orders/{leadId}/timeline", "NON_EXISTENT_LEAD_ID"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Lead not found: 999999"));
+                .andExpect(jsonPath("$.message").value("Lead not found: NON_EXISTENT_LEAD_ID"));
     }
 }

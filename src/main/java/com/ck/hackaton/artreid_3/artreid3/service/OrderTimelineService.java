@@ -4,6 +4,7 @@ import com.ck.hackaton.artreid_3.artreid3.config.SlaConfig;
 
 import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineResponseDTO;
 import com.ck.hackaton.artreid_3.artreid3.dto.OrderTimelineStepDTO;
+import com.ck.hackaton.artreid_3.artreid3.model.Lead;
 import com.ck.hackaton.artreid_3.artreid3.model.LeadEvent;
 import com.ck.hackaton.artreid_3.artreid3.model.StageName;
 import com.ck.hackaton.artreid_3.artreid3.repository.LeadEventRepository;
@@ -25,11 +26,11 @@ public class OrderTimelineService {
     private final SlaConfig slaConfig;
 
 
-    public OrderTimelineResponseDTO getTimelineResponse(Long leadId) {
-        leadRepository.findById(leadId)
-                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + leadId));
+    public OrderTimelineResponseDTO getTimelineResponse(String externalLeadId) {
+        Lead lead = leadRepository.findByExternalLeadId(externalLeadId)
+                .orElseThrow(() -> new IllegalArgumentException("Lead not found: " + externalLeadId));
 
-        List<OrderTimelineStepDTO> steps = getTimeline(leadId);
+        List<OrderTimelineStepDTO> steps = getTimeline(lead.getLeadId());
 
         if (steps.isEmpty()) {
             return OrderTimelineResponseDTO.builder()

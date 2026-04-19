@@ -13,7 +13,7 @@ public class OrderTimelineController {
     private final OrderTimelineService timelineService;
 
     @GetMapping("/{leadId}/timeline")
-    public OrderTimelineResponseDTO getOrderTimeline(@PathVariable Long leadId) {
+    public OrderTimelineResponseDTO getOrderTimeline(@PathVariable String leadId) {
         return timelineService.getTimelineResponse(leadId);
     }
 }
