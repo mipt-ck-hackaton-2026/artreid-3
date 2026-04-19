@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.16.0...v1.17.0) (2026-04-19)
+
+
+### Features
+
+* update project documentation in README.md ([9cbe0e1](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/9cbe0e10d0dabca4e18a5a5a0e87a6b13e4058c0))
+
 # [1.16.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.15.0...v1.16.0) (2026-04-19)
 
 
