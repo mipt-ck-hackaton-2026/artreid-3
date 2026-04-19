@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.14.0...v1.15.0) (2026-04-19)
+
+
+### Features
+
+* implement autocomplete API for lead attributes with repository support and integration tests ([6830ee0](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/6830ee002e80245d350a5fc2a7e8a51ac6b25032))
+
 # [1.14.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.13.0...v1.14.0) (2026-04-19)
 
 
