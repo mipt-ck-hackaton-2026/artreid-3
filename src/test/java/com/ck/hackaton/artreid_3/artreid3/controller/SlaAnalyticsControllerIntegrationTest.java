@@ -128,17 +128,17 @@ class SlaAnalyticsControllerIntegrationTest {
                 .andExpect(jsonPath("$.pipeline").value("full"))
                 .andExpect(jsonPath("$.period.from").value("2025-02-01"))
                 .andExpect(jsonPath("$.period.to").value("2025-04-01"))
-                .andExpect(jsonPath("$.metrics.full_total.threshold_minutes").value(16))
+                .andExpect(jsonPath("$.metrics.full_total.threshold_minutes").value(23040))
                 .andExpect(jsonPath("$.metrics.full_total.total_orders").value(1))
-                .andExpect(jsonPath("$.metrics.full_total.met_count").value(0))
-                .andExpect(jsonPath("$.metrics.full_total.met_percent").value(0.0))
-                .andExpect(jsonPath("$.metrics.full_total.breach_count").value(1))
-                .andExpect(jsonPath("$.metrics.full_total.breach_percent").value(100.0))
+                .andExpect(jsonPath("$.metrics.full_total.met_count").value(1))
+                .andExpect(jsonPath("$.metrics.full_total.met_percent").value(100.0))
+                .andExpect(jsonPath("$.metrics.full_total.breach_count").value(0))
+                .andExpect(jsonPath("$.metrics.full_total.breach_percent").value(0.0))
                 .andExpect(jsonPath("$.metrics.full_total.avg_minutes").value(16359.18))
                 .andExpect(jsonPath("$.metrics.full_total.median_minutes").value(16359.18))
                 .andExpect(jsonPath("$.metrics.full_total.p90_minutes").value(16359.18))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.metadata.unit").value("day"))
-                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.metadata.total_count").value(1))
+                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.metadata.total_count").value(0))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[0].sort_order").value(1))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[0].min_bound").value(0))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[0].max_bound").value(1))
@@ -152,10 +152,9 @@ class SlaAnalyticsControllerIntegrationTest {
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].sort_order").value(3))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].min_bound").value(3))
                 .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].max_bound").isEmpty())
-                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].count").value(1))
-                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].ratio").value(1.0));
-    }
-
+                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].count").value(0))
+                .andExpect(jsonPath("$.metrics.full_total.breach_distribution.items[2].ratio").value(0.0));
+                }
     @Test
     void getFullSummary_dateFromAfterDateTo_returnsBadRequest() throws Exception {
         mockMvc.perform(get("/api/sla/full/summary")

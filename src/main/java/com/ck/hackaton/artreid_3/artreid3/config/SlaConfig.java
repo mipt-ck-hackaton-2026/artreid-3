@@ -38,4 +38,8 @@ public class SlaConfig {
     public int getDeliverySlaThresholdMinutes() {
         return delivery.getTotalDays() * 24 * 60;
     }
+
+    public int getFullCycleThresholdMinutes() {
+        return fullCycleDays * 24 * 60;
+    }
 }

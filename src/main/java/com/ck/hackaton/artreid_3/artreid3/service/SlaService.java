@@ -21,7 +21,7 @@ public class SlaService {
 
     public FullSummaryResponseDTO getSlaFull(LocalDate dateFrom, LocalDate dateTo) {
         LocalDate[] range = DateResolutionUtil.resolveDateRange(dateFrom, dateTo);
-        int fullThreshold = slaConfig.getFullCycleDays();
+        int fullThreshold = slaConfig.getFullCycleThresholdMinutes();
         LocalDateTime start = DateResolutionUtil.toStartOfDay(range[0]);
         LocalDateTime end = DateResolutionUtil.toEndOfDay(range[1]);
 
