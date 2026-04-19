@@ -1,6 +1,7 @@
 # ArtReid-3
 
 > CRM-аналитика лидов — Spring Boot REST API для отслеживания лидов и их перемещения по воронке продаж.
+> **Frontend репозиторий:** [mipt-ck-hackaton-2026/artreid-3-frontend](https://github.com/mipt-ck-hackaton-2026/artreid-3-frontend)
 
 ![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-6db33f?logo=springboot)
@@ -65,6 +66,7 @@ docker-compose -f dockerfiles_prod/docker-compose.yml up --build -d
 ```
 
 Приложение запустится на `http://localhost:8080`.
+Frontend будет доступен на `http://localhost:3000`.
 
 ### 3. Проверьте что всё работает
 
