@@ -33,6 +33,8 @@ public class SlaMetricsRepository {
                 LEFT JOIN lead_events le_closed ON l.lead_id = le_closed.lead_id AND le_closed.stage_name = 'CLOSED'
                 WHERE l.outcome_unknown = false AND l.lifecycle_incomplete = false
                   AND (le_created.event_time BETWEEN :dateFrom AND :dateTo)
+                  AND (:managerId::VARCHAR IS NULL OR l.manager_id = :managerId::VARCHAR)
+                  AND (:qualification::VARCHAR IS NULL OR l.lead_qualification = :qualification::VARCHAR)
             )""";
 
     private B2CMetricDetails mapMetricDetails(java.sql.ResultSet rs, String prefix, int threshold, int[] bounds, String unit) throws java.sql.SQLException {
@@ -57,6 +59,8 @@ public class SlaMetricsRepository {
     public FullSummaryMetrics findFullSummary(
             LocalDateTime dateFrom,
             LocalDateTime dateTo,
+            String managerId,
+            String qualification,
             int fullThresholdMinutes) {
 
         String query = RAW_DATA_CTE + " SELECT " + getMetricsColumns() + " FROM raw_data";
@@ -64,7 +68,10 @@ public class SlaMetricsRepository {
         Map<String, Object> params = new HashMap<>();
         params.put("dateFrom", dateFrom);
         params.put("dateTo", dateTo);
+        params.put("managerId", managerId);
+        params.put("qualification", qualification);
         params.put("fullThreshold", fullThresholdMinutes);
+        params.put("zero", 0);
 
         return namedParameterJdbcTemplate.queryForObject(query, params,
                 (rs, rowNum) -> FullSummaryMetrics.builder()
@@ -77,7 +84,7 @@ public class SlaMetricsRepository {
 
         StringBuilder sb = new StringBuilder();
         sb.append(MetricsHelper.buildBaseColumns("full", "fullThreshold"));
-        sb.append(MetricsHelper.buildBucketColumns("full", "fullThreshold", daysBuckets, 1440));
+        sb.append(MetricsHelper.buildBucketColumns("full", "zero", daysBuckets, 1440));
         return sb.toString();
     }
 }

@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.springframework.format.annotation.DateTimeFormat.ISO;
-
 @RestController
 @RequestMapping("/api/sla")
 @RequiredArgsConstructor
@@ -50,8 +48,10 @@ public class SlaAnalyticsController {
     @GetMapping("/full/summary")
     public FullSummaryResponseDTO getFullSummary(
             @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo) {
-        return slaService.getSlaFull(dateFrom, dateTo);
+            @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo,
+            @RequestParam(required = false) String managerId,
+            @RequestParam(required = false) String qualification) {
+        return slaService.getSlaFull(dateFrom, dateTo, managerId, qualification);
     }
 
     @GetMapping("/delivery/by-manager")
