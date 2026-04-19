@@ -25,6 +25,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRINGDOC_SWAGGER_UI_PATH: /api/swagger-ui
       SPRINGDOC_API_DOCS_PATH: /api/api-docs
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
     depends_on:
       db:
         condition: service_healthy
