@@ -65,15 +65,6 @@ public class B2CMetricsRepository {
         return sb.toString();
     }
 
-    private static double getDouble(BigDecimal value) {
-        return value != null ? value.setScale(2, RoundingMode.HALF_UP).doubleValue() : 0.0;
-    }
-
-    private static double calculatePercent(long part, long total) {
-        if (total == 0) return 0.0;
-        return BigDecimal.valueOf((double) part / total * 100.0).setScale(2, RoundingMode.HALF_UP).doubleValue();
-    }
-
     private B2CMetricDetails mapMetricDetails(java.sql.ResultSet rs, String prefix, int threshold, int[] bounds, String unit) throws java.sql.SQLException {
         long total = rs.getLong(prefix + "_total");
         long met = rs.getLong(prefix + "_met");
@@ -83,12 +74,12 @@ public class B2CMetricsRepository {
                 .thresholdMinutes(threshold)
                 .totalOrders(total)
                 .metCount(met)
-                .metPercent(calculatePercent(met, total))
+                .metPercent(MetricsHelper.calculatePercent(met, total))
                 .breachCount(breach)
-                .breachPercent(calculatePercent(breach, total))
-                .avgMinutes(getDouble(rs.getBigDecimal(prefix + "_avg")))
-                .medianMinutes(getDouble(rs.getBigDecimal(prefix + "_median")))
-                .p90Minutes(getDouble(rs.getBigDecimal(prefix + "_p90")))
+                .breachPercent(MetricsHelper.calculatePercent(breach, total))
+                .avgMinutes(MetricsHelper.getDouble(rs.getBigDecimal(prefix + "_avg")))
+                .medianMinutes(MetricsHelper.getDouble(rs.getBigDecimal(prefix + "_median")))
+                .p90Minutes(MetricsHelper.getDouble(rs.getBigDecimal(prefix + "_p90")))
                 .breachDistribution(MetricsHelper.mapBreachDistribution(rs, prefix, bounds, unit))
                 .build();
     }

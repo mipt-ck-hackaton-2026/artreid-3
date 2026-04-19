@@ -2,6 +2,8 @@ package com.ck.hackaton.artreid_3.artreid3.repository;
 
 import com.ck.hackaton.artreid_3.artreid3.dto.BreachDistributionDTO;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,6 +41,15 @@ public class MetricsHelper {
                 percentile_cont(0.5) WITHIN GROUP (ORDER BY %1$s_interval_min) as %1$s_median,
                 percentile_cont(0.9) WITHIN GROUP (ORDER BY %1$s_interval_min) as %1$s_p90,
                 """, prefix, thresholdParam);
+    }
+
+    public static double getDouble(BigDecimal value) {
+        return value != null ? value.setScale(2, RoundingMode.HALF_UP).doubleValue() : 0.0;
+    }
+
+    public static double calculatePercent(long part, long total) {
+        if (total == 0) return 0.0;
+        return BigDecimal.valueOf((double) part / total * 100.0).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     public static BreachDistributionDTO mapBreachDistribution(ResultSet rs, String prefix, int[] bounds, String unit) throws SQLException {
