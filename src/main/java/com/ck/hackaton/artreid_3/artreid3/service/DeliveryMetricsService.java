@@ -23,11 +23,18 @@ public class DeliveryMetricsService {
         private final DeliveryMetricsRepository slaMetricsRepository;
         private final SlaConfig slaConfig;
 
-        public ManagerDeliverySlaResponseDTO getDeliverySlaByManager(SlaDeliveryRequestDTO request) {
-                int sla4Threshold = slaConfig.getDelivery().getToPvzDays() * 24 * 60;
-                int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
-                int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
+        private record DeliveryThresholds(int sla4, int sla5, int total) {}
 
+        private DeliveryThresholds resolveThresholds() {
+                return new DeliveryThresholds(
+                        slaConfig.getDelivery().getToPvzDays() * 24 * 60,
+                        slaConfig.getDelivery().getPvzStorageDays() * 24 * 60,
+                        slaConfig.getDelivery().getTotalDays() * 24 * 60
+                );
+        }
+
+        public ManagerDeliverySlaResponseDTO getDeliverySlaByManager(SlaDeliveryRequestDTO request) {
+                DeliveryThresholds t = resolveThresholds();
                 LocalDateTime[] range = DateResolutionUtil.resolveDateRange(request.getDateFrom(), request.getDateTo());
                 LocalDateTime dateFrom = range[0];
                 LocalDateTime dateTo = range[1];
@@ -38,9 +45,9 @@ public class DeliveryMetricsService {
                                 request.getDeliveryManagerId(),
                                 request.getLeadQualification(),
                                 request.getDeliveryService(),
-                                sla4Threshold,
-                                sla5Threshold,
-                                delThreshold);
+                                t.sla4(),
+                                t.sla5(),
+                                t.total());
 
                 return ManagerDeliverySlaResponseDTO.builder()
                                 .pipeline("delivery")
@@ -53,10 +60,7 @@ public class DeliveryMetricsService {
         }
 
         public DeliverySummaryResponseDTO getDeliverySummary(SlaDeliveryRequestDTO request) {
-                int sla4Threshold = slaConfig.getDelivery().getToPvzDays() * 24 * 60;
-                int sla5Threshold = slaConfig.getDelivery().getPvzStorageDays() * 24 * 60;
-                int delThreshold = slaConfig.getDelivery().getTotalDays() * 24 * 60;
-
+                DeliveryThresholds t = resolveThresholds();
                 LocalDateTime[] range = DateResolutionUtil.resolveDateRange(request.getDateFrom(), request.getDateTo());
                 LocalDateTime dateFrom = range[0];
                 LocalDateTime dateTo = range[1];
@@ -67,9 +71,9 @@ public class DeliveryMetricsService {
                                 request.getDeliveryManagerId(),
                                 request.getLeadQualification(),
                                 request.getDeliveryService(),
-                                sla4Threshold,
-                                sla5Threshold,
-                                delThreshold);
+                                t.sla4(),
+                                t.sla5(),
+                                t.total());
 
                 return DeliverySummaryResponseDTO.builder()
                                 .pipeline("delivery")

@@ -33,19 +33,11 @@ public class B2CSlaService {
         );
     }
 
-    private LocalDateTime toStartOfDay(LocalDate date) {
-        return date.atStartOfDay();
-    }
-
-    private LocalDateTime toEndOfDay(LocalDate date) {
-        return date.plusDays(1).atStartOfDay();
-    }
-
     public B2CSummaryResponseDTO calculateSummary(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
         B2CThresholds t = resolveThresholds();
         LocalDate[] range = DateResolutionUtil.resolveDateRange(dateFrom, dateTo);
-        LocalDateTime start = toStartOfDay(range[0]);
-        LocalDateTime end = toEndOfDay(range[1]);
+        LocalDateTime start = DateResolutionUtil.toStartOfDay(range[0]);
+        LocalDateTime end = DateResolutionUtil.toEndOfDay(range[1]);
 
         B2CSummaryResponseDTO.B2CSummaryMetrics metrics = b2cMetricsRepository.findB2CSummary(
                 start,
@@ -70,8 +62,8 @@ public class B2CSlaService {
     public ManagerB2CSlaResponseDTO getB2CSlaByManager(LocalDate dateFrom, LocalDate dateTo, String managerId, String qualification) {
         B2CThresholds t = resolveThresholds();
         LocalDate[] range = DateResolutionUtil.resolveDateRange(dateFrom, dateTo);
-        LocalDateTime start = toStartOfDay(range[0]);
-        LocalDateTime end = toEndOfDay(range[1]);
+        LocalDateTime start = DateResolutionUtil.toStartOfDay(range[0]);
+        LocalDateTime end = DateResolutionUtil.toEndOfDay(range[1]);
 
         List<ManagerB2CSlaResponseDTO.ManagerB2CData> data = b2cMetricsRepository.findB2CByManager(
                 start,
