@@ -62,11 +62,18 @@ class OrderTimelineControllerIntegrationTest {
         Long leadId = leads.get(0).getLeadId();
 
         mockMvc.perform(get("/api/orders/{leadId}/timeline", leadId))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.pipeline").exists())
+                .andExpect(jsonPath("$.pipeline").value("lead"))
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data[0].stage").value("CREATED"))
+                .andExpect(jsonPath("$.data[0].slaViolated").value(true))
+                .andExpect(jsonPath("$.data[1].stage").value("SALE"))
+                .andExpect(jsonPath("$.data[1].slaViolated").value(true))
+                .andExpect(jsonPath("$.data[2].stage").value("HANDED_TO_DELIVERY"))
+                .andExpect(jsonPath("$.data[2].slaViolated").value(true));
     }
 
     @Test

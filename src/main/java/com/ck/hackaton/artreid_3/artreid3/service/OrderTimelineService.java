@@ -91,6 +91,9 @@ public class OrderTimelineService {
         if (from == StageName.SALE && to == StageName.TO_ASSEMBLY)
             return actualMinutes > (slaConfig.getB2c().getToAssemblyHours() * 60);
 
+        if (from == StageName.SALE && to == StageName.HANDED_TO_DELIVERY)
+            return actualMinutes > (slaConfig.getB2c().getToAssemblyHours() * 60 + slaConfig.getB2c().getAssemblyToDeliveryDays() * 1440);
+
         if (from == StageName.TO_ASSEMBLY && to == StageName.HANDED_TO_DELIVERY)
             return actualMinutes > (slaConfig.getB2c().getAssemblyToDeliveryDays() * 1440);
 

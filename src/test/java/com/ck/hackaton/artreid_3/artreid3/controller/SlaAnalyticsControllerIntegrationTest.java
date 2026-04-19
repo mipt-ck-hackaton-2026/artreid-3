@@ -61,8 +61,17 @@ class SlaAnalyticsControllerIntegrationTest {
         mockMvc.perform(get("/api/sla/b2c/summary")
                         .param("dateFrom", "2025-02-01")
                         .param("dateTo", "2025-04-01"))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pipeline").value("b2c"));
+                .andExpect(jsonPath("$.pipeline").value("b2c"))
+                .andExpect(jsonPath("$.metrics.sla1_reaction.threshold_minutes").value(30))
+                .andExpect(jsonPath("$.metrics.sla1_reaction.total_orders").value(1))
+                .andExpect(jsonPath("$.metrics.sla2_to_assembly.threshold_minutes").value(240))
+                .andExpect(jsonPath("$.metrics.sla2_to_assembly.total_orders").value(1))
+                .andExpect(jsonPath("$.metrics.sla3_to_delivery.threshold_minutes").value(1440))
+                .andExpect(jsonPath("$.metrics.sla3_to_delivery.total_orders").value(1))
+                .andExpect(jsonPath("$.metrics.b2c_total.threshold_minutes").value(2880))
+                .andExpect(jsonPath("$.metrics.b2c_total.total_orders").value(1));
     }
 
     @Test
@@ -84,7 +93,14 @@ class SlaAnalyticsControllerIntegrationTest {
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data").isNotEmpty())
                 .andExpect(jsonPath("$.data[0].manager_id").exists())
-                .andExpect(jsonPath("$.data[0].metrics").exists());
+                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.threshold_minutes").value(30))
+                .andExpect(jsonPath("$.data[0].metrics.sla1_reaction.total_orders").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.sla2_to_assembly.threshold_minutes").value(240))
+                .andExpect(jsonPath("$.data[0].metrics.sla2_to_assembly.total_orders").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.sla3_to_delivery.threshold_minutes").value(1440))
+                .andExpect(jsonPath("$.data[0].metrics.sla3_to_delivery.total_orders").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.b2c_total.threshold_minutes").value(2880))
+                .andExpect(jsonPath("$.data[0].metrics.b2c_total.total_orders").value(1));
     }
 
     @Test
@@ -140,11 +156,20 @@ class SlaAnalyticsControllerIntegrationTest {
         mockMvc.perform(get("/api/sla/delivery/by-manager")
                         .param("dateFrom", "2025-02-01T00:00:00")
                         .param("dateTo", "2025-04-01T23:59:59"))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.pipeline").value("delivery"))
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data[0].metrics.sla4_to_pvz.threshold_minutes").value(7200))
+                .andExpect(jsonPath("$.data[0].metrics.sla4_to_pvz.total_orders").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.sla4_to_pvz.breach_count").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.sla5_at_pvz.threshold_minutes").value(10080))
+                .andExpect(jsonPath("$.data[0].metrics.sla5_at_pvz.total_orders").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.sla5_at_pvz.met_count").value(1))
+                .andExpect(jsonPath("$.data[0].metrics.delivery_total.threshold_minutes").value(20160))
+                .andExpect(jsonPath("$.data[0].metrics.delivery_total.met_count").value(1));
     }
 
     @Test
@@ -156,9 +181,12 @@ class SlaAnalyticsControllerIntegrationTest {
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.pipeline").value("delivery"))
                 .andExpect(jsonPath("$.metrics").exists())
-                .andExpect(jsonPath("$.metrics.sla4_to_pvz").exists())
-                .andExpect(jsonPath("$.metrics.sla5_at_pvz").exists())
-                .andExpect(jsonPath("$.metrics.delivery_total").exists());
+                .andExpect(jsonPath("$.metrics.sla4_to_pvz.threshold_minutes").value(7200))
+                .andExpect(jsonPath("$.metrics.sla4_to_pvz.total_orders").value(1))
+                .andExpect(jsonPath("$.metrics.sla5_at_pvz.threshold_minutes").value(10080))
+                .andExpect(jsonPath("$.metrics.sla5_at_pvz.total_orders").value(1))
+                .andExpect(jsonPath("$.metrics.delivery_total.threshold_minutes").value(20160))
+                .andExpect(jsonPath("$.metrics.delivery_total.total_orders").value(1));
     }
 
     @Test

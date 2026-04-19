@@ -28,8 +28,8 @@ public class B2CMetricsRepository {
                 SELECT
                     l.manager_id as manager_id,
                     EXTRACT(EPOCH FROM (le_sale.event_time - le_created.event_time)) / 60 AS sla1_interval_min,
-                    EXTRACT(EPOCH FROM (le_assembly.event_time - le_sale.event_time)) / 60 AS sla2_interval_min,
-                    EXTRACT(EPOCH FROM (le_handed.event_time - le_assembly.event_time)) / 60 AS sla3_interval_min,
+                    EXTRACT(EPOCH FROM (COALESCE(le_assembly.event_time, le_handed.event_time) - le_sale.event_time)) / 60 AS sla2_interval_min,
+                    EXTRACT(EPOCH FROM (le_handed.event_time - COALESCE(le_assembly.event_time, le_sale.event_time))) / 60 AS sla3_interval_min,
                     EXTRACT(EPOCH FROM (le_handed.event_time - le_created.event_time)) / 60 AS b2c_interval_min
                 FROM leads l
                 JOIN lead_events le_created ON l.lead_id = le_created.lead_id AND le_created.stage_name = 'CREATED'
