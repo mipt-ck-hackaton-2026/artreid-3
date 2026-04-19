@@ -166,13 +166,19 @@ artreid-3/
 │   │   ├── java/com/ck/hackaton/artreid_3/artreid3/
 │   │   │   ├── Artreid3Application.java       # Точка входа
 │   │   │   ├── controller/                    # REST-контроллеры
-│   │   │   │   ├── HealthController.java      # GET /api/health
-│   │   │   │   ├── DataLoadController.java    # POST /api/data/load
-│   │   │   │   └── SlaMetricsController.java  # GET /api/sla/delivery/by-manager
-│   │   │   ├── service/                       # Бизнес-логика (импорт, SLA метрики)
-│   │   │   ├── repository/                    # Spring Data JPA и JDBC Batch
-│   │   │   ├── model/                         # JPA-сущности и DTO
-│   │   │   └── config/                        # Конфигурации (напр. SlaConfig)
+│   │   │   │   ├── HealthController.java      # Проверка состояния
+│   │   │   │   ├── DataLoadController.java    # Импорт CSV
+│   │   │   │   ├── SlaAnalyticsController.java # Комплексная аналитика
+│   │   │   │   ├── SlaConfigController.java   # Управление конфигом
+│   │   │   │   └── OrderTimelineController.java # Таймлайны заказов
+│   │   │   ├── service/                       # Бизнес-логика
+│   │   │   │   ├── B2CSlaService.java         # Логика SLA 1-3
+│   │   │   │   ├── DeliveryMetricsService.java # Логика SLA 4-5
+│   │   │   │   ├── SlaService.java            # Общая агрегация
+│   │   │   │   └── OrderTimelineService.java  # Построение цепочек событий
+│   │   │   ├── repository/                    # Spring Data JPA
+│   │   │   ├── model/                         # Сущности (Lead, LeadEvent)
+│   │   │   └── config/                        # Конфигурации и Hot-reload
 │   │   └── resources/
 │   │       ├── application.properties         # Базовая конфигурация приложения
 │   │       ├── sla-config.yml                 # Динамические настройки SLA
@@ -185,8 +191,15 @@ artreid-3/
 │   └── test/
 │       └── java/com/ck/hackaton/artreid_3/artreid3/
 │           ├── Artreid3ApplicationTests.java          # Smoke-тест контекста
-│           └── controller/
-│               └── HealthControllerTest.java          # Unit-тест контроллера
+│           ├── controller/                            # Интеграционные тесты API
+│           │   ├── DataLoadControllerIntegrationTest.java
+│           │   ├── OrderTimelineControllerIntegrationTest.java
+│           │   └── SlaAnalyticsControllerIntegrationTest.java
+│           ├── service/                               # Тесты бизнес-логики
+│           │   └── OrderTimelineServiceIntegrationTest.java
+│           └── util/                                  # Unit-тесты утилит
+│               ├── DateResolutionUtilTest.java
+│               └── DateValidationUtilTest.java
 ├── build.gradle                # Конфигурация сборки
 ├── settings.gradle             # Настройки Gradle (имя проекта)
 ├── compose.yaml                # Docker Compose для локальной разработки
