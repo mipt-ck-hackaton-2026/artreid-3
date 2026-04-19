@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.12.0...v1.13.0) (2026-04-19)
+
+
+### Features
+
+* add SLA calculation for direct sale-to-delivery transition and update integration tests with detailed metric assertions. ([a0b8525](https://github.com/mipt-ck-hackaton-2026/artreid-3/commit/a0b85251c2b70a101d50bcd8fbe21c1efa8c394a))
+
 # [1.12.0](https://github.com/mipt-ck-hackaton-2026/artreid-3/compare/v1.11.0...v1.12.0) (2026-04-19)
 
 

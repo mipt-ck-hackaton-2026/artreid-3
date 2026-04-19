@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.ck.hackaton.artreid_3'
-version = '1.12.0'
+version = '1.13.0'
 
 publishing {
 	repositories {
